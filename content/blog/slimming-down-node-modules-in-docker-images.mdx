@@ -1,0 +1,62 @@
+---
+title: Slimming Down node_modules in Docker Images
+date: '2019-02-04'
+updated: '2019-02-04'
+draft: false
+---
+
+Everyone knows the meme about the size of the `node_modules` folder so I'll try to make this one quick. You can (in some cases) drastically reduce the size of a resulting docker image by avoiding the inclusion of non-production node modules.
+
+## Create a builder image
+
+This is an easy one, and probably something you're already used to doing. Create a Dockerfile as you would normally but this time we'll add an `as` keyword. This essentially creates a name for the current image in the `FROM` line.
+
+```docker{1}
+FROM node:8-alpine as builder
+WORKDIR /app
+
+COPY src/ ./src
+COPY package* ./
+COPY tsconfig.json ./
+
+RUN npm install
+RUN npm run build
+```
+
+## Install your production dependencies
+
+We're also going to use the same `as` keyword in this image to tell the final image where to get the production dependencies from.
+
+```docker{1}
+FROM node:10-alpine as dependencies
+WORKDIR /app
+
+# Copy over the original package.json, we need this to npm install!
+COPY --from=builder /app/package* ./
+
+RUN npm install --production
+```
+
+## Compose your final image
+
+Now we can **reference the previous images** using the `--from` argument _* gasps *_. This means we can compose a final image from all the previous stages **without** the `node_modules` bloat.
+
+```docker{5,8,11}
+FROM node:10-alpine
+WORKDIR /app
+
+# Copy over our built application code
+COPY --from=builder /app/dist ./dist
+
+# Copy over the original package.json so we know how to start it
+COPY --from=builder /app/package.json .
+
+# Copy over our hopefully much lighter node_modules folder
+COPY --from=dependencies /app/node_modules ./node_modules
+
+CMD ["npm", "run", "start"]
+```
+
+Putting **all three** snippets together in a **single Dockerfile** should achieve a much thinner image now that we're not including all our development dependencies as well.
+
+For more about multi-stage builds, see the [official Docker documentation](https://docs.docker.com/develop/develop-images/multistage-build/).

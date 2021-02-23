@@ -1,10 +1,5 @@
 import React from 'react'
-
-interface TagValue {
-  bg: string
-  fg: string
-  name: string
-}
+import Image from 'next/image'
 
 const tagConfig = {
   typescript: {
@@ -38,6 +33,7 @@ interface Props {
   postUrl?: string
   url: string
   tags: Tag[]
+  icon: string
 }
 
 export function MajorProject({
@@ -45,20 +41,21 @@ export function MajorProject({
   summary,
   postUrl,
   url,
+  icon,
   tags
 }: Props): JSX.Element {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <span className="block w-6 h-6 rounded-full bg-gray-900" />
+          <Image src={icon} layout="fixed" width={24} height={24} />
           <h3 className="font-bold text-lg">{name}</h3>
         </div>
         <a
           href={url}
           target="_blank"
           rel="noopener"
-          className="text-blue-500 hover:underline"
+          className="text-blue-500 hover:underline font-semibold"
         >
           View 🡵
         </a>
@@ -68,7 +65,10 @@ export function MajorProject({
           .sort((a, b) => (a > b ? 1 : -1))
           .map(tag => tagConfig[tag])
           .map(tag => (
-            <span className={`text-xs py-1 px-2 rounded ${tag.bg} ${tag.fg}`}>
+            <span
+              key={`MajorProject-${name}-Tag-${tag.name}`}
+              className={`text-xs py-1 px-2 rounded ${tag.bg} ${tag.fg}`}
+            >
               {tag.name}
             </span>
           ))}

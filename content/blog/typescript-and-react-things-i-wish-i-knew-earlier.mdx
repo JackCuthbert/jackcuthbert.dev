@@ -1,0 +1,139 @@
+---
+title: TypeScript & React Things I Wish I Knew Earlier
+date: '2019-09-22'
+draft: false
+---
+
+During my quest to master TypeScript and React I've discovered some super
+helpful type definitions and syntax along the way that I wish I knew earlier.
+
+## React.FC
+
+I had no idea this was a thing for so long that it's kind of embarrassing to
+admit. It took me some `ctrl + click` (or `gd` for the [Vimmasterrace](https://gitlab.com/JackCuthbert/dotfiles/tree/master/config/nvim))
+spelunking in my editor to discover my new favourite type, `React.FC`. All the
+following examples are _effectively_ equal.
+
+```tsx
+const MyComponent = (props: Props) => {
+  /* ... */
+}
+const MyComponent: React.FunctionComponent<Props> = props => {
+  /* ... */
+}
+const MyComponent: React.FC<Props> = props => {
+  /* ... */
+}
+function MyComponent(props: Props): JSX.Element {
+  /* ... */
+}
+```
+
+> To get the nice types around `props.children` you should use the `React.FC`
+> type assertion even though the variations without it still work.
+
+## React.ChangeEvent & React.MouseEvent
+
+`React.SyntheticEvent` was my go-to type definition for all my event handler
+parameters. While this worked well for some time, I resorted to using overly
+verbose runtime type narrowing and generally messy handler functions just to
+make the compiler stop yelling at me.
+
+It would've looked something like this when using the older class component
+style.
+
+```tsx{2}
+class MyInput extends React.Component {
+  handleClick (event: React.SyntheticEvent<HTMLButtonElement>) {
+    // do the thing with the stuff
+  }
+
+  render () {
+    return (
+      <button onClick={this.handleClick}></button>
+    )
+  }
+}
+```
+
+Change events can use the `React.ChangeEvent<T>` type where `T` is the type of
+element triggering the handler. This will work on all `<input>` elements,
+checkboxes too! Just be careful to have your runtime checks ensure that your
+handler is attached to the right kind of element.
+
+```tsx{4}
+import React, { useCallback, FC, ChangeEvent } from 'react'
+
+const Input: FC<Props> = ({ onChange }) => {
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    // do the thing with the stuff
+  })
+
+  return <input onChange={handleChange} />
+}
+```
+
+When using a click handler, React passes up the event parameter as a
+`React.MouseEvent<T>` – again `T` is the type of element triggering the handler.
+
+```tsx{4}
+import React, { useCallback, FC, MouseEvent } from 'react'
+
+const Input: FC<Props> = ({ onChange }) => {
+  const handleClick = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    // do the thing with the stuff
+  })
+
+  return <button onClick={handleClick}>Click me!</button>
+}
+```
+
+## Generic function components
+
+In a very contrived example you can tell TypeScript to use a generic with a
+function component in TSX using the `function` keyword syntax. I've typically
+used this method to wrap higher order components that pass through specific
+object shapes to its children.
+
+First, define your function with a generic as if you were writing a non-TSX
+function.
+
+```tsx
+interface Props<T> {
+  items: T[]
+}
+
+function MyComponent<T>({ items }: Props<T>) {
+  return props.children({ genericItems: items })
+}
+```
+
+Then pass in whatever type of entity you like! The [Render Props](https://reactjs.org/docs/render-props.html)
+(in this case) will now know what properties are available on `genericItems` as
+it's being inferred by `MyComponent`. This is of course a very contrived example
+and your actual implementations may well be a lot more useful than this one.
+
+```tsx{11}
+const items = [
+  { name: 'one' },
+  { name: 'two' }
+]
+
+const MyView: React.FC = () => (
+  <MyComponent items={items}>
+    {({ genericItems }) => {
+      <ul>
+        {/* item.name is totally valid here with asserting types :O */}
+        {genericItems.map(item => <li>{item.name}</li>}
+      </li>
+    }}
+  </MyComponent>
+)
+```
+
+## Closing thoughts
+
+TypeScript with React continues to be a joy to write, especially when armed with
+editors like Visual Studio Code that provide easy ways to navigate your way
+through type definitions with a single shortcut. It's definitely made my
+day-to-day far more productive and my code much cleaner.
