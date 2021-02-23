@@ -1,0 +1,89 @@
+import React from 'react'
+
+interface TagValue {
+  bg: string
+  fg: string
+  name: string
+}
+
+const tagConfig = {
+  typescript: {
+    bg: 'bg-blue-600',
+    fg: 'text-white',
+    name: 'TypeScript'
+  },
+  openSource: {
+    bg: 'bg-gray-900',
+    fg: 'text-white',
+    name: 'Open Source'
+  },
+  googleCloud: {
+    bg: 'bg-green-600',
+    fg: 'text-white',
+    name: 'Google Cloud'
+  },
+  mlAi: {
+    bg: 'bg-yellow-600',
+    fg: 'text-white',
+    name: 'ML / AI'
+  }
+}
+
+type Tag = keyof typeof tagConfig
+
+interface Props {
+  // icon: string TODO
+  name: string
+  summary: string
+  postUrl?: string
+  url: string
+  tags: Tag[]
+}
+
+export function MajorProject({
+  name,
+  summary,
+  postUrl,
+  url,
+  tags
+}: Props): JSX.Element {
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div className="flex justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <span className="block w-6 h-6 rounded-full bg-gray-900" />
+          <h3 className="font-bold text-lg">{name}</h3>
+        </div>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener"
+          className="text-blue-500 hover:underline"
+        >
+          View 🡵
+        </a>
+      </div>
+      <div className="mb-4 flex space-x-1">
+        {tags
+          .sort((a, b) => (a > b ? 1 : -1))
+          .map(tag => tagConfig[tag])
+          .map(tag => (
+            <span className={`text-xs py-1 px-2 rounded ${tag.bg} ${tag.fg}`}>
+              {tag.name}
+            </span>
+          ))}
+      </div>
+      <p className="text-gray-700 mb-3">{summary}</p>
+      {postUrl !== undefined && (
+        <div className="flex space-x-2">
+          <a
+            href={postUrl}
+            className="text-blue-500 rounded text-black font-semibold hover:underline"
+          >
+            Read blog post
+          </a>
+        </div>
+      )}
+    </div>
+  )
+}
