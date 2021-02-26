@@ -6,7 +6,7 @@ import type { MdxRemote } from 'next-mdx-remote/types'
 
 const root = path.join(process.cwd(), 'content')
 
-type ContentType = 'blog'
+type ContentType = 'blog' | 'pages'
 
 export interface FrontMatter {
   title: string
@@ -46,7 +46,7 @@ export async function getFileBySlug(
 
   return {
     mdxSource,
-    frontMatter: data as any
+    frontMatter: data as FrontMatter
   }
 }
 

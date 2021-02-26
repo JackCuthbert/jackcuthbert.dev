@@ -1,0 +1,294 @@
+---
+title: Arch Linux Installation Guide
+date: '2019-09-08'
+tags: ['linux']
+---
+
+This is my personal guide that I've used to install Arch on my various systems.
+Your mileage may vary when using this guide, always refer to the official
+documentation if you get stuck.
+
+Much of this guide is based on [this amazing gist by njam](https://gist.github.com/njam/85ab2771b40ccc7ddcef878eb82a0fe9).
+
+## Getting Started Links
+
+1. [Download Arch Linux](https://www.archlinux.org/download/)
+2. [USB flash installation media](https://wiki.archlinux.org/index.php/USB_flash_installation_media)
+3. [Installation Guide](https://wiki.archlinux.org/index.php/Installation_Guide)
+4. [GitHub Gist](https://gist.github.com/njam/85ab2771b40ccc7ddcef878eb82a0fe9)
+
+## Step 1: Get the system ready
+
+After booting into archiso, set a large font to see what you're doing. This is
+especially useful for the tiny XPS display.
+
+```bash
+setfont latarcyrheb-sun32
+```
+
+If this is a device with wifi, connect to the internet now
+
+```bash
+wifi-menu
+```
+
+Set the time
+
+```bash
+timedatectl set-ntp true
+```
+
+At this point we need to create some partitions.
+
+## Step 2: Partitions
+
+First we need to create some partitions on our disk, I prefer to use `fdisk`.
+
+```bash
+fdisk /dev/<devName>
+```
+
+### Partition tables
+
+The following table should be used. Partition 1 is the boot partition, partition
+2 will enable full disk encryption.
+
+| partition | mount point | type   | size         |
+| --------- | ----------- | ------ | ------------ |
+| 1         | `/boot`     | `ef00` | `512M`       |
+| 2         | `/`         | `8300` | rest of disk |
+
+### Create filesystems
+
+After partitioning is done, create the boot filesystem on the first partition
+
+```bash
+mkfs.fat -F32 /dev/<devName>p1
+```
+
+Next, create the LUKs container using btrfs on the main partition and open it
+for use
+
+```bash
+cryptsetup luksFormat --type=luks2 /dev/<devName>p2
+cryptsetup open /dev/<devName>p2 luks
+mkfs.btrfs -L luks /dev/mapper/luks
+```
+
+Next you can create the btrfs subvolumes that are required for system
+installation
+
+```bash
+mount -t btrfs /dev/mapper/luks /mnt
+btrfs subvolume create /mnt/@root
+btrfs subvolume create /mnt/@var
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@swap # if using swap
+```
+
+### Mounting partitions
+
+Finally we need to mount our subvolumes and boot partition
+
+```bash
+umount /mnt
+mount -o subvol=@root /dev/mapper/luks /mnt
+mkdir /mnt/{var,home,swap}
+mount -o subvol=@var /dev/mapper/luks /mnt/var
+mount -o subvol=@home /dev/mapper/luks /mnt/home
+mount -o subvol=@swap /dev/mapper/luks /mnt/swap # if using swap
+```
+
+Create an 8G swapfile if you're using swap (requires linux 5+, check [this
+guide](https://fogelholk.io/installing-arch-with-lvm-on-luks-and-btrfs/) for
+more details)
+
+```bash
+truncate -s 0 /mnt/swap/swapfile
+chattr +C /mnt/swap/swapfile
+dd if=/dev/zero of=/mnt/swap/swapfile bs=1M count=8192 status=progress
+chmod 600 /mnt/swap/swapfile
+mkswap /mnt/swap/swapfile
+swapon /mnt/swap/swapfile
+```
+
+Mount boot partition
+
+```bash
+mkdir /mnt/boot
+mount /dev/<devName>p1 /mnt/boot
+```
+
+## Step 3: Install the system
+
+Order the mirrorlist file how you like, I'll be putting Australian mirrors first
+
+```bash
+vim /etc/pacman.d/mirrorlist
+```
+
+Next, install the base system with some additional packages. For a more complete
+list of packages that I typically install see [my
+dotfiles](https://gitlab.com/JackCuthbert/dotfiles).
+
+```bash
+pacstrap /mnt base base-devel linux linux-firmware btrfs-progs zsh vim git sudo efibootmgr networkmanager network-manager-applet
+```
+
+> If this system has wifi, also include these: `wpa_supplicant dialog iw`
+
+> Edit 31 Jan 2020: `linux linux-firmware` added as [they no longer exist](https://www.archlinux.org/news/base-group-replaced-by-mandatory-base-package-manual-intervention-required/)
+> in the `base` group.
+
+Finally, generate an `/etc/fstab` file and make recommended adjustments
+
+```bash
+genfstab -L /mnt >> /mnt/etc/fstab
+
+# For all btrfs filesystems consider:
+# - Change "relatime" to "noatime" to reduce wear on SSD
+# - Adding "discard" to enable continuous TRIM for SSD
+```
+
+## Step 4: Configure the system
+
+Enter the new system with chroot
+
+```bash
+arch-chroot /mnt
+```
+
+Set the timezone and sync it to the system clock
+
+```bash
+rm /etc/localtime
+ln -s /usr/share/zoneinfo/Australia/Melbourne /etc/localtime
+hwclock --systohc
+```
+
+Generate the required locales
+
+```bash
+vim /etc/locale.gen	# Uncomment desired locales, e.g. "en_US.UTF-8", "en_AU.UTF-8"
+locale-gen
+```
+
+Set the desired locale
+
+```bash
+echo 'LANG=en_AU.UTF-8' > /etc/locale.conf
+```
+
+Set desired keymap and font
+
+```bash
+echo 'KEYMAP=us' > /etc/vconsole.conf
+echo 'FONT=latarcyrheb-sun32' >> /etc/vconsole.conf
+```
+
+Set a hostname
+
+```bash
+echo '<hostname>' > /etc/hostname
+```
+
+Add that hostname to `/etc/hosts`
+
+```
+127.0.0.1 localhost
+::1       localhost
+127.0.1.1 <hostname>.localdomain <hostname>
+```
+
+Set a root password
+
+```bash
+passwd
+```
+
+Add a real user
+
+```bash
+useradd -m -g users -G wheel -s /bin/zsh <username>
+passwd <username>
+```
+
+Allow this user to use `sudo` by uncommenting the wheel group line after running
+the `visudo` command
+
+```
+%wheel ALL=(ALL) ALL
+```
+
+Configure mkinitcpio with modules needed for the initrd image
+
+```bash
+vim /etc/mkinitcpio.conf
+# Change: HOOKS=(base systemd autodetect modconf block keyboard sd-vconsole sd-encrypt filesystems)
+```
+
+Regenerate initrd image
+
+```bash
+mkinitcpio -p linux
+```
+
+Enable the NetworkManager service for networking support on boot
+
+```bash
+systemctl enable NetworkManager.service
+```
+
+## Step 5: Install the bootloader
+
+Install [systemd-boot](https://wiki.archlinux.org/index.php/Systemd-boot) in
+your `/boot` partition
+
+```bash
+bootctl --path=/boot install
+```
+
+Enable microcode updates for your systems architecture
+
+```bash
+pacman -S amd-ucode # or intel-ucode
+```
+
+Get the luks-uuid
+
+```bash
+cryptsetup luksUUID /dev/<devName>p2
+```
+
+Use the luks-uuid to create the bootloader entry in `/boot/loader/entries/arch.conf`
+
+```
+title   Arch Linux
+linux   /vmlinuz-linux
+initrd  /amd-ucode.img # or /intel-ucode.img
+initrd  /initramfs-linux.img
+options rw luks.uuid=<uuid> luks.name=<uuid>=luks root=/dev/mapper/luks rootflags=subvol=@root
+```
+
+> A quick way to do this without clipboard support is to use the
+> `:r! cryptsetup luksUUID /dev/<devName>p2` command within vim
+
+Set default bootloader entry and options in `/boot/loader/loader.conf`
+
+```
+default	arch
+timeout 3 # if needed
+```
+
+Finally, reboot!
+
+```bash
+exit
+reboot
+```
+
+At this point you should have a working Arch Linux installation and any desktop
+customisations are up to you. See [my
+dotfiles](https://gitlab.com/JackCuthbert/dotfiles) or [Desktop
+Experience](/notes/arch-linux/desktop-experience/) for info on how I set up
+my system.

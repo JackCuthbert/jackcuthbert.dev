@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.prose h1 {
+  @apply text-2xl mb-12;
+}
+
+.prose h2 {
+  @apply text-xl;
+}
+
+.prose h3 {
+  @apply text-lg;
+}
+
+.prose h4 {
+}
+
+.prose h5 {
+  @apply text-pink-500;
+}
+
+.shadow-brutal {
+  box-shadow: 5px 5px 0px #000;
+}

@@ -45,8 +45,8 @@ export function MajorProject({
   tags
 }: Props): JSX.Element {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4">
-      <div className="flex justify-between mb-2">
+    <div className="bg-white border border-black p-4">
+      <div className="flex justify-between items-center mb-2">
         <div className="flex items-center space-x-2">
           <Image src={icon} layout="fixed" width={24} height={24} />
           <h3 className="font-bold text-lg">{name}</h3>
@@ -55,7 +55,7 @@ export function MajorProject({
           href={url}
           target="_blank"
           rel="noopener"
-          className="text-blue-500 hover:underline font-semibold"
+          className="text-black font-mono font-semibold hover:bg-black hover:text-white"
         >
           View 🡵
         </a>
@@ -67,7 +67,7 @@ export function MajorProject({
           .map(tag => (
             <span
               key={`MajorProject-${name}-Tag-${tag.name}`}
-              className={`text-xs py-1 px-2 rounded ${tag.bg} ${tag.fg}`}
+              className={`text-xs py-1 px-2 ${tag.bg} ${tag.fg}`}
             >
               {tag.name}
             </span>
@@ -78,7 +78,7 @@ export function MajorProject({
         <div className="flex space-x-2">
           <a
             href={postUrl}
-            className="text-blue-500 rounded text-black font-semibold hover:underline"
+            className="text-black font-mono font-semibold hover:bg-black hover:text-white"
           >
             Read blog post
           </a>

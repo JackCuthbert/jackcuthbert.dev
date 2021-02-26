@@ -2,22 +2,22 @@ import React, { FC } from 'react'
 import type { GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MajorProject } from '../components/MajorProject'
 import { MinorProject } from '../components/MinorProject'
 import { FrontMatter, getAllFilesFrontMatter } from '../lib/content'
+import { format } from 'date-fns'
 
 interface PageProps {
   posts: FrontMatter[]
 }
 
 const Bold: FC = ({ children }) => (
-  <span className="text-black font-semibold">{children}</span>
+  <span className="text-gray-800 font-bold">{children}</span>
 )
 
 const Page: NextPage<PageProps> = ({ posts }) => {
   return (
     <div className="max-w-2xl mx-auto px-4">
-      <div className="mb-12 mt-8 md:mt-24 md:mb-16">
+      <div className="mb-20 mt-24">
         <div className="mb-4">
           <Image
             layout="fixed"
@@ -28,32 +28,28 @@ const Page: NextPage<PageProps> = ({ posts }) => {
             height={128}
           />
         </div>
-        <h1 className="font-black text-5xl mb-4">Yo, I'm Jack.</h1>
-        <p className="text-gray-600 text-lg mb-4">
+        <h1 className="font-bold text-3xl mb-4">Yo, I'm Jack.</h1>
+        <p className="text-gray-500 font-semibold text-xl mb-4 leading-relaxed">
           I'm a <Bold>full-stack software engineer</Bold> based in Melbourne
-          with a passion for <Bold>product development and design</Bold>.
+          with a passion for <Bold>product development</Bold> and{' '}
+          <Bold>minimalist design</Bold>.
         </p>
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-2xl mb-4 font-semibold">Projects</h2>
+      <div className="mb-20">
+        <h2 className="text-2xl mb-8">Projects</h2>
 
-        <div className="grid grid-cols-1 gap-4 mb-4">
-          <MajorProject
+        <div className="grid grid-cols-1 gap-6">
+          <MinorProject
             name="Kaomoji.moe"
+            summary="NLP-powered Slack App to send Japanese text emoticons"
             url="https://kaomoji.moe"
-            summary="A slack app providing instant access to over 10,000 fun and unique Japanese kaomoji. V2 is out now and has been built with natural language processing, TypeScript, and Google Cloud Run."
-            tags={['mlAi', 'typescript', 'googleCloud']}
-            icon="/kaomoji-favicon.png"
           />
 
-          <MajorProject
+          <MinorProject
             name="slack-fm"
+            summary="Self-hosted service to sync Last.fm with Slack statuses"
             url="https://github.com/JackCuthbert/slack-fm"
-            summary="A tiny self-hosted service that automatically updates your Slack status from your Last.fm profile just like in the good ol' days of MSN messenger."
-            postUrl="some.url"
-            tags={['openSource', 'typescript']}
-            icon="/slack-fm-favicon.png"
           />
 
           <MinorProject
@@ -76,15 +72,26 @@ const Page: NextPage<PageProps> = ({ posts }) => {
         </div>
       </div>
 
-      <h2 className="text-2xl mb-4 font-semibold">Recent posts</h2>
-      <div className="mb-8">
-        {posts.map(post => (
-          <Link href={'/blog/' + post.slug}>
-            <a className="bg-white border border-gray-200 rounded-lg p-4 flex space-x-4">
-              {post.title}
-            </a>
-          </Link>
-        ))}
+      <div className="mb-20">
+        <h2 className="text-2xl mb-8">Blog</h2>
+        <div className="grid grid-cols-1 gap-6">
+          {posts
+            .sort((postA, postB) => {
+              return postA.date > postB.date ? -1 : 1
+            })
+            .map(post => (
+              <div className="flex items-center justify-between">
+                <Link href={'/blog/' + post.slug}>
+                  <a className="font-bold text-black hover:bg-black hover:text-white">
+                    {post.title}
+                  </a>
+                </Link>
+                <span className="text-sm">
+                  {format(new Date(post.date), 'd LLL yy')}
+                </span>
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   )

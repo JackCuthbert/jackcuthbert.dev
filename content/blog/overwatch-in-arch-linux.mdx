@@ -1,0 +1,37 @@
+---
+title: Overwatch in Arch Linux
+date: '2019-02-09'
+tags: ['linux']
+---
+
+Gaming on Linux has certainly come a long way since I first tried it under
+Ubuntu years ago – so much so that I'm now playing games on Linux 90% of the
+time. For the other 10% of my time I'm dual booting back into Windows 10 if I
+absolutely have to.
+
+## Lutris
+
+First, we're going to need [Lutris](https://lutris.net). Lutris is an open
+source gaming platform for Linux. At a lower level, it's a collection of curated
+scripts to install and run games that do not support Linux natively.
+
+Thankfully Lutris is in the main repo under Arch Linux so installation is
+simple, for other distributions see [their installation page](https://lutris.net/downloads/).
+
+```bash
+sudo pacman -S lutris
+```
+
+## DXVK
+
+DXVK is a Vulkan based implementation of Direct3D 10/11 that runs on Linux/Wine.
+This is required for many Windows-only games and Lutris will manage most of this
+for us, all _we_ need to do is install Wine (staging) and some Vulkan
+dependencies.
+
+```bash
+sudo pacman -S wine-staging vulkan-icd-loader lib32-vulkan-icd-loader
+```
+
+Once these are installed, boot up Lutris and install Overwatch via the search
+box!

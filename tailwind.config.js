@@ -1,3 +1,4 @@
+const typography = require('@tailwindcss/typography')
 module.exports = {
   purge: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
@@ -13,5 +14,5 @@ module.exports = {
       cursor: ['disabled']
     }
   },
-  plugins: []
+  plugins: [typography]
 }

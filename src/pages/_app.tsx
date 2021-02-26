@@ -1,15 +1,15 @@
-import 'tailwindcss/tailwind.css'
+import '../styles/global.css'
 import React from 'react'
 import type { AppProps } from 'next/app'
 import { Footer } from '../components/shared/Footer'
 
 export default function App({ Component, pageProps }: AppProps): JSX.Element {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow bg-gray-50">
+    <div className="min-h-screen bg-white flex flex-col">
+      <main className="">
         <Component {...pageProps} />
       </main>
-      <footer className="bg-gray-200">
+      <footer className="">
         <Footer />
       </footer>
     </div>

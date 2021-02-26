@@ -1,0 +1,36 @@
+---
+title: Serverless and Slack
+date: '2019-01-26'
+tags: ['serverless', 'backend']
+---
+
+In the early days of building out [Kaomoji.moe](https://kaomoji.moe/) I was
+learning about the [Serverless framework](https://serverless.com/) and the
+benefits around being able to simply write code without worrying about
+deployments, security, or infrastructure planning.
+
+## The problem
+
+Serverless framework promised me super scalable and encapsulated functions that
+could be deployed in seconds. So this is what I did; I built my app with this
+idea that Serverless was the way to go. Kaomoji.moe was originally built as 3–4
+functions that dealt with everything: OAuth, slash commands, event
+subscriptions, you name it.
+
+Slack has a hard requirement of responding to any slash command in under 3
+seconds. No matter what I did to optimise the cold-start time or the speed of my
+code, I simply could not create a consistent Serverless endpoint (via AWS
+Lambda) that returned a result quick enough. Many of the responses were
+perfectly fine, but my users were often complaining about timeout issues in
+their commands. This is not great for user experience.
+
+## The "solution"
+
+Kaomoji is now written as an always-on Koa server (deployed by GitLab CI and AWS
+Elastic Beanstalk) that can consistently respond in less than a second. It's
+also been a great way to extract some repetitive actions like verifying Slack
+requests and retrieving user information into isolated and testable middleware
+functions.
+
+I think Serverless has a place at massive scale, until then for a fast slash
+command experience, stick with traditional Node.js servers.

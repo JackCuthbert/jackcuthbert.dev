@@ -1,0 +1,100 @@
+---
+title: ComponentConf 2019 Recap
+date: '2019-09-15'
+tags: ['frontend']
+---
+
+Last week the first [ComponentConf](https://www.componentsconf.com.au) was held
+in Melbourne which was split over 2 days, the first day being a workshop day and
+the second being the conference day. My employer was generous enough to send the
+whole frontend team to the conference day to learn about all the new things ✨.
+
+## The venue, food, and sponsors
+
+It was held in Marvel Stadium across 2 "stages" (they were just two rooms with a
+breakout room in between) with plenty of time between sessions to discuss talks.
+The morning tea break was 10/10, big ol' scones with a heap of cream and
+strawberry jam.
+
+I managed to pick up a pretty decent amount of nerdy developer stickers too
+(thanks GitLab!) but I didn't win any door prizes in exchange for my personal
+information. Better luck next time I guess.
+
+Culture Amp was pushing pretty hard with the recruitment drive throughout the
+conference. While I agree that it's a great place and time to recruit devs,
+starting nearly _every_ talk with a short spiel about the fact you're hiring
+before introducing the speaker got old pretty quick.
+
+## The talks
+
+Nerd swag and food aside, this was a day to learn about frontend development.
+The conference was "dual track" meaning that for every time slot you had to
+choose one of two talks to attend. These are the talks I found a lot of value
+from out of the ones I attended.
+
+### Looking into the Vueture: Composition Functions
+
+Presented by [Natalia Tepiuhina](https://twitter.com/N_Tepluhina) (who works for
+GitLab and is a VueJS core member), this talked about the new [composition API](https://vue-composition-api-rfc.netlify.com/)
+that's coming soon to Vue v3. While I don't have any experience with Vue, it
+seemed to borrow a lot from the React hooks API. Sounds look a good idea to me,
+maybe I should give Vue a go at some point 🤔.
+
+### Translating React
+
+This one was pretty entertaining. [Jennifer Wong](https://twitter.com/mybluewristband)
+(a Software Engineer at Mode and Mozilla Tech speaker) put together a really
+great presentation with all the gifs and jokes you'd expect from the JS
+community on spelunking throughout the React source code and understanding "what
+actually is a component?".
+
+In particular, making your own React renderer with
+[react-reconciler](https://github.com/facebook/react/tree/master/packages/react-reconciler)
+sounds nuts but a really fascinating problem for a rainy day.
+
+### When Virtual DOM Diffing is a Little Too Clever
+
+[Diana MacDonald](https://twitter.com/didoesdigital), a Product Designer at
+Culture Amp, presented this talk about her experience building out a side
+project called [Typey Type](https://didoesdigital.com/typey-type/) that helps
+stenographers improve their typing speed (much like a typing test). She talked
+about what she learned supporting A11Y features when it comes to dynamically
+changing content with React.
+
+In my understanding, it boiled down to ensuring that some specific browser
+features are considered when targeting users with screen readers. Using
+[ARIA live regions](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions) and the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) are really useful here along with a dedicated announcement area somewhere in the
+document.
+
+## Data-Driven Frontend Components and the New Jira Navigation
+
+Wilson Mendes, a Software Engineer at Atlassian, talked about how they used
+user satisfaction, A/B testing, and asynchronous code loading to validate their
+ideas and iterate on the decisions Atlassian made with the new Jira navigation.
+
+With the right frameworks and workflows in place (and millions of users), this
+seems like a really good way to validate your ideas in production.
+
+- Build in experiment support into your components (manager/HOC components)
+- Create hypotheses and validate components against real data (using some agreed
+  upon measure of satisfaction)
+- Async load _everything_ to reduce bundle size of multiple "duplicate" components
+
+### Designing with Components
+
+Presented by the prolific [Mark Dalgleish](https://twitter.com/markdalgleish)
+and easliy my highlight of the conference. Mark talked about the new project to
+come out of Seek OSS, [Playroom](https://github.com/seek-oss/playroom), and how
+designers and developers can work closer by building UI in the browser using it.
+
+This is something we're trying to do at [Bueno](https://www.buenosystems.com.au)
+which a reasonable amount of success (using [Docz](https://docz.site)) with our
+own component library. With the addition of Playroom it should be even easier
+to iterate on our UI patterns.
+
+## Closing thoughts
+
+I must admit that my expectations for ComponentConf 2019 were pretty low after
+going to the fantastic CSS/JSConf the last two times but I was pleasently
+surprised. There was a lot of really interesting and well presented talks, I'd
+definitely recommend going to the next one 👍.

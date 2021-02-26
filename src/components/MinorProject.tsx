@@ -8,16 +8,16 @@ interface Props {
 
 export function MinorProject({ name, summary, url }: Props): JSX.Element {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 sm:flex sm:space-x-4 sm:justify-between">
+    <div className="sm:flex sm:space-x-4 sm:justify-between sm:items-center">
       <a
-        className="block font-bold text-blue-500 hover:underline mb-1 sm:m-0"
+        className="font-bold text-black mb-1 sm:m-0 hover:bg-black hover:text-white"
         href={url}
         target="_blank"
         rel="noopener"
       >
         {name} 🡵
       </a>
-      <p>{summary}</p>
+      <p className="font-italic sm:text-sm">{summary}</p>
     </div>
   )
 }

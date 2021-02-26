@@ -1,0 +1,34 @@
+---
+title: Automated Login In Arch Linux
+date: '2019-07-20'
+tags: ['linux']
+---
+
+Now that I'm using Arch Linux + i3-gaps everywhere with encrypted installs
+logging in _after_ typing my encryption password has become slow and annoying.
+With the following steps you'll only have to type your encryption password
+during boot and the rest of the system will start up as normal.
+
+> This works well for my setup where I run `startx` immediately after logging in
+> [with this script](https://gitlab.com/JackCuthbert/dotfiles/blob/master/config/zsh/startx.zsh)
+> in my `.zshrc` file on an encrypted partition. I do not recommend doing this if
+> you don't encrypt your stuff!
+
+Create a directory named `getty@tty1.service.d/` inside the systemd system unit
+files directory:
+
+```bash
+sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
+```
+
+Create a file in this folder called `override.conf` with the following content:
+
+```ini
+# /etc/systemd/system/getty@tty1.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=-/usr/bin/agetty --autologin YOUR_USERNAME_HERE --noclear %I $TERM
+```
+
+That's it! On next reboot, it will skip the tty1 login step and go straight to
+your window manager.
