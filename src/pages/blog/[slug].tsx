@@ -3,24 +3,31 @@ import hydrate from 'next-mdx-remote/hydrate'
 import { format } from 'date-fns'
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { getFileBySlug, getSlugs, PostData } from '../../lib/content'
+import { useRouter } from 'next/router'
+import { PageContainer } from '../../components/layout/PageContainer'
 
 const Page: NextPage<PostData> = ({ mdxSource, frontMatter }) => {
+  const router = useRouter()
   const content = hydrate(mdxSource)
 
   return (
-    <div className="max-w-2xl mx-auto px-4 mt-24 mb-20">
-      <article className="prose">
-        <h1
-          title={`Published on ${format(
-            new Date(frontMatter.date),
-            'MMMM d, yyyy'
-          )}`}
+    <PageContainer>
+      <div className="mb-20">
+        <button
+          onClick={() => router.back()}
+          className="font-bold text-black mb-1 sm:m-0 hover:bg-black hover:text-white"
         >
-          {frontMatter.title}
-        </h1>
+          🡰 Back
+        </button>
+      </div>
+      <article className="prose">
+        <h1>{frontMatter.title}</h1>
+        <p className="text-sm text-gray-500">
+          Published on {format(new Date(frontMatter.date), 'MMMM d, yyyy')}
+        </p>
         {content}
       </article>
-    </div>
+    </PageContainer>
   )
 }
 

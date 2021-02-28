@@ -1,96 +1,97 @@
-import Link from 'next/link'
-import React, { FC } from 'react'
+import React from 'react'
+import { CustomLink } from '../CustomLink'
+import { NowPlaying } from '../NowPlaying'
 
 export function Footer(): JSX.Element {
   return (
     <div className="max-w-2xl mx-auto px-4 mb-8">
       <div className="border-t border-gray-300 mb-16" />
 
-      {/* <div className="mb-16"> */}
-      {/*   <p className="font-semibold mb-2">🎵 Now playing</p> */}
-      {/*   <p>Everybody Loves The Sunshine (feat. José James) — Takuya Kuroda</p> */}
-      {/* </div> */}
-
       <div className="grid grid-cols-3">
         <div className="flex flex-col space-y-4">
           <div>
-            <Link href="/">
-              <a className="font-semibold text-gray-400 hover:text-white hover:bg-black">
-                Home
-              </a>
-            </Link>
+            <CustomLink
+              href="/"
+              className="font-semibold text-gray-400 hover:text-white hover:bg-black"
+            >
+              Home
+            </CustomLink>
           </div>
           <div>
-            <a
+            <CustomLink
               href="#"
               className=" font-semibold text-gray-400 hover:text-white hover:bg-black"
             >
               Notes
-            </a>
+            </CustomLink>
           </div>
           <div>
-            <a
-              href="#"
+            <CustomLink
+              href="/blog"
+              className=" font-semibold text-gray-400 hover:text-white hover:bg-black"
+            >
+              Blog
+            </CustomLink>
+          </div>
+          <div>
+            <CustomLink
+              href="/uses"
               className=" font-semibold text-gray-400 hover:text-white hover:bg-black"
             >
               Uses
-            </a>
+            </CustomLink>
           </div>
         </div>
 
         <div className="flex flex-col space-y-4">
           <div>
-            <a
+            <CustomLink
               href="https://github.com/JackCuthbert/"
               target="_blank"
-              rel="noopener"
               className="font-semibold text-gray-400 hover:text-white hover:bg-black"
             >
               GitHub 🡵
-            </a>
+            </CustomLink>
           </div>
           <div>
-            <a
+            <CustomLink
               target="_blank"
-              rel="noopener"
               href="https://www.linkedin.com/in/jackcuthbert/"
               className="font-semibold text-gray-400 hover:text-white hover:bg-black"
             >
               LinkedIn 🡵
-            </a>
+            </CustomLink>
           </div>
           <div>
-            <a
+            <CustomLink
               href="https://www.last.fm/user/jckcthbrt"
               target="_blank"
-              rel="noopener"
               className="font-semibold text-gray-400 hover:text-white hover:bg-black"
             >
               Last.fm 🡵
-            </a>
+            </CustomLink>
           </div>
           <div>
-            <a
+            <CustomLink
               target="_blank"
               rel="noopener noreferrer me"
               href="https://md.jckcthbrt.io/@jack"
               className="font-semibold text-gray-400 hover:text-white hover:bg-black"
             >
               Mastodon 🡵
-            </a>
+            </CustomLink>
           </div>
         </div>
 
         <div className="flex flex-col space-y-4">
           <div>
-            <a
+            <CustomLink
               href="#"
               target="_blank"
-              rel="noopener"
               className=" font-semibold text-gray-400 hover:text-white hover:bg-black"
             >
               License
-            </a>
+            </CustomLink>
           </div>
         </div>
       </div>
