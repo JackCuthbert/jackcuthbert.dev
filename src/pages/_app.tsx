@@ -1,3 +1,4 @@
+import '../styles/fonts.css'
 import '../styles/global.css'
 import '../styles/prism-dark.css'
 import React from 'react'

@@ -10,7 +10,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Mulish', ...fontFamily.sans]
+        sans: ['Mulish', ...fontFamily.sans],
+        mono: ['JetBrains Mono', ...fontFamily.mono]
       }
     }
   },
