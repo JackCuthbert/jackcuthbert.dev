@@ -5,29 +5,37 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { getFileBySlug, getSlugs, PostData } from '../../lib/content'
 import { useRouter } from 'next/router'
 import { PageContainer } from '../../components/layout/PageContainer'
+import { MDXComponents } from '../../components/shared/MDXComponents'
+import Head from 'next/head'
 
 const Page: NextPage<PostData> = ({ mdxSource, frontMatter }) => {
   const router = useRouter()
-  const content = hydrate(mdxSource)
+  const content = hydrate(mdxSource, {
+    components: MDXComponents
+  })
 
   return (
-    <PageContainer>
-      <div className="mb-20">
-        <button
-          onClick={() => router.back()}
-          className="font-bold text-black mb-1 sm:m-0 hover:bg-black hover:text-white"
-        >
-          🡰 Back
-        </button>
-      </div>
-      <article className="prose">
-        <h1>{frontMatter.title}</h1>
-        <p className="text-sm text-gray-500">
-          Published on {format(new Date(frontMatter.date), 'MMMM d, yyyy')}
-        </p>
-        {content}
-      </article>
-    </PageContainer>
+    <>
+      <Head>
+        <title>{frontMatter.title} · Jack Cuthbert</title>
+      </Head>
+      <PageContainer>
+        <div className="mb-20">
+          <button
+            onClick={() => router.back()}
+            className="font-bold text-black mb-1 sm:m-0 hover:bg-black hover:text-white"
+          >
+            🡰 Back
+          </button>
+        </div>
+        <article className="prose">
+          <h1 title={format(new Date(frontMatter.date), 'MMMM d, yyyy')}>
+            {frontMatter.title}
+          </h1>
+          {content}
+        </article>
+      </PageContainer>
+    </>
   )
 }
 

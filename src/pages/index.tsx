@@ -29,7 +29,7 @@ const Page: NextPage<PageProps> = ({ posts }) => {
             <Image
               layout="fixed"
               className="rounded-full"
-              src="/avatar.jpg"
+              src="/images/avatar.jpg"
               alt="Picture of Jack Cuthbert"
               width={128}
               height={128}

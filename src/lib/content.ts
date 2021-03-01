@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from 'fs'
 import matter from 'gray-matter'
 import renderToString from 'next-mdx-remote/render-to-string'
 import type { MdxRemote } from 'next-mdx-remote/types'
+import { MDXComponents } from '../components/shared/MDXComponents'
 
 const root = path.join(process.cwd(), 'content')
 
@@ -42,7 +43,9 @@ export async function getFileBySlug(
       : readFileSync(path.join(root, type, `${type}.mdx`), 'utf8')
 
   const { data, content } = matter(source)
-  const mdxSource = await renderToString(content)
+  const mdxSource = await renderToString(content, {
+    components: MDXComponents
+  })
 
   return {
     mdxSource,

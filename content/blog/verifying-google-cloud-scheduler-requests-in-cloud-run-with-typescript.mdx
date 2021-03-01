@@ -1,0 +1,197 @@
+---
+title: Verifying Cloud Scheduler requests in Google Cloud Run with TypeScript
+date: '2020-05-02'
+tags: ['typescript', 'backend', 'serverless']
+draft: false
+---
+
+Part of the new system that I'm building for the V2 rewrite of [Kaomoji.moe](https://kaomojie.moe)
+needs to be able to run a task on some kind of schedule. This is a
+perfect job for [Cloud Scheduler](https://cloud.google.com/scheduler/) but the
+documentation to do this in an authenticated way is either too dense for me to
+understand or doesn't have enough examples to follow.
+
+## Context
+
+I have a [Cloud Run](https://cloud.google.com/run/) service that exposes an API
+endpoint which will do some work that produces a `.json` file and then uploads
+that file to a storage bucket. I don't want this work to be run on _every_
+invocation of another endpoint, doing this will likely add a lot of latency to
+requests which usually ends up being [really bad for Slack apps](/blog/serverless-and-slack/).
+This endpoint also shouldn't be called by any old client or user, so I need to
+make sure that only Cloud Scheduler is authorised to call the endpoint.
+
+For this I need Cloud Scheduler to add some kind of token to every request, and
+my API endpoint to verify that this token is legitimate. This validation process
+has been [documented quite extensively](https://developers.google.com/identity/protocols/oauth2/openid-connect#validatinganidtoken)
+by Google themselves yet they provide little in the way of examples.
+
+## 1. Create a Cloud Scheduler job
+
+At this point I'll assume that you have a Cloud Run service running and a
+working endpoint that you can call. First, we need to create the job in Cloud
+Scheduler. Fill in or select the following options:
+
+1. select the **HTTP target**
+1. select **Add OIDC token** auth header (typically shown under "Show more")
+1. add a **service account** that has the role **Cloud Run Invoker**
+1. add an **audience that matches the URL** the job will invoke.
+
+![Creating a job](./create-job.png)
+
+<Image width={983} height={771} src="/images/blog/verifying-google-cloud-scheduler-requests-in-cloud-run-with-typescript/create-job.png" />
+
+## 2. Verify the request
+
+Aside from making the request to your endpoint, Cloud Scheduler will add a few
+headers that we need to pay attention to:
+
+1. an `authorisation` header containing a typical [Bearer Token](https://stackoverflow.com/questions/40375508/whats-the-difference-between-jwts-and-bearer-token)
+1. a `user-agent` header with the value `Google-Cloud-Scheduler`
+1. a `x-cloudscheduler` header with a boolean value
+
+### Bearer Token
+
+First it's probably a good idea to verify the token. Unfortunately we'll need to
+do a little manual work to sign and verify it. I'll be borrowing heavily from
+the fantastic [node-jsonwebtoken](https://github.com/auth0/node-jsonwebtoken),
+and [node-jwks-rsa](https://github.com/auth0/node-jwks-rsa) libraries of course.
+
+```bash
+npm install --save jsonwebtoken jwks-rsa
+```
+
+It's a little heavy on the boilerplate code here but I've documented it as best
+I can. All of the following should be somewhere either the endpoint itself or
+some middleware for the endpoint.
+
+```ts
+import jwksClient from 'jwks-rsa'
+import jwt from 'jsonwebtoken'
+
+/** This is all the data that Cloud Scheduler will insert into the OIDC token */
+interface GoogleOIDCToken {
+  aud: string
+  azp: string
+  email: string
+  email_verified: boolean
+  exp: number
+  iat: number
+  iss: string
+  sub: string
+}
+
+/**
+ * The jwksUri contains all the keys needed to sign the incoming JWT. This URL
+ * is documented here:
+ * https://developers.google.com/identity/protocols/oauth2/openid-connect#discovery
+ */
+const client = jwksClient({
+  jwksUri: 'https://www.googleapis.com/oauth2/v3/certs'
+})
+
+/**
+ * This function is used by `jwt.verify` to retrieve signing keys.
+ *
+ * The type definitions for these arguments are _not_ exposed by `jwks-rsa`.
+ * Make sure to check the definition of the `jwt.verify` method for more
+ * information.
+ */
+function getKey(header: any, callback: any): void {
+  client.getSigningKey(header.kid, (err: Error, key: any) => {
+    if (err !== null) return callback(err)
+    const signingKey = key.publicKey ?? key.rsaPublicKey
+    callback(null, signingKey)
+  })
+}
+
+/**
+ * Using the jwksClient, verify the token against the key set. The promise here
+ * is not required, but provides a nicer API to work with at the callsite.
+ */
+async function verifyToken(token: string): Promise<GoogleOIDCToken> {
+  return await new Promise((resolve, reject) => {
+    // Notice here we're using the `getKey` function defined above
+    jwt.verify(token, getKey, (err, decoded) => {
+      if (err !== null) return reject(err)
+      return resolve(decoded as GoogleOIDCToken)
+    })
+  })
+}
+```
+
+Next you can call the `verifyToken()` function within a `try`/`catch` block.
+If the token is invalid the function will `throw` and you can handle the error
+case in whatever way your server requires.
+
+We'll also want to verify that the `iss` and `aud` (issuer and audience
+respectively) match what we expect from Cloud Scheduler. The **issuer** should
+be `https://accounts.google.com` and the **audience** should be the value you
+supplied during the creation of the job (I use the endpoint the job is calling).
+
+All together this might look something like:
+
+```ts
+try {
+  // ...snip... header validation
+
+  const token = await verifyToken(req.headers.authorization.split(' ')[1])
+
+  if (token.iss !== 'https://accounts.google.com') {
+    return res.status(403).send('Invalid issuer')
+  }
+
+  if (token.aud !== `https://${req.headers.host}/some/endpoint`) {
+    return res.status(403).send('Invalid audience')
+  }
+} catch (error) {
+  return res.status(403).send('Invalid OIDC token')
+}
+```
+
+### Headers
+
+To finish up with something easy, we can still verify a few more things in the
+request before continuing with the business logic of the endpoint.
+
+1. `user-agent`
+1. `x-cloudscheduler`
+
+Throw these checks in before attempting verifying the token:
+
+```ts
+if (req.headers.authorization === undefined) {
+  return res.status(403).send('Missing authorization header')
+}
+
+if (req.headers['user-agent'] !== 'Google-Cloud-Scheduler') {
+  return res.status(403).send('Invalid user agent')
+}
+
+if (req.headers['x-cloudscheduler'] !== 'true') {
+  return res.status(403).send('Missing header')
+}
+```
+
+## 3. Profit
+
+This flow certainly feels like it could've been documented in a simpler way by
+the team at Google but at the same time it's likely to be quite an early time
+for establishing architecture patterns for Cloud Scheduler to Cloud Run flows.
+
+## Bonus ramblings
+
+The rewrite of Kaomoji.moe has been a long time coming, it's currently costing
+me about $12AUD/mo to run which isn't that much but I feel like it isn't _worth_
+that much to run such a simple service. Part of the high cost is thanks to the
+COVID-19 crisis making the aussie dollar [tank in value](https://www.abc.net.au/news/2020-03-19/jobless-rate-falls-australian-sharemarket-recovery-coronavirus/12070076)
+(pre-COVID was around $10-11AUD/mo), but mostly it's due to being run on a
+single always-on EC2 `t2.micro` instance in AWS.
+
+The idea is to rewrite it completely (while adding more features) to make use of
+Cloud Run's low running costs and the arguably _far_ nicer APIs in the
+`@google-cloud/*` node modules. "But Cloud Run is 'serverless', [what about cold
+starts](/blog/serverless-and-slack/)?" I hear you ask. Well yeah, it's still a
+problem that adds too much latency for the Slack API to cope with but the
+project has grown quite a bit since I originally launched it that I imagine
+there will be enough users to avoid this cold start issue 🤞.
