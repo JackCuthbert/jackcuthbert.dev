@@ -1,4 +1,6 @@
+const { fontFamily } = require('tailwindcss/defaultTheme')
 const typography = require('@tailwindcss/typography')
+
 module.exports = {
   purge: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
@@ -6,7 +8,11 @@ module.exports = {
   ],
   darkMode: false, // or 'media' or 'class'
   theme: {
-    extend: {}
+    extend: {
+      fontFamily: {
+        sans: ['Mulish', ...fontFamily.sans]
+      }
+    }
   },
 
   variants: {

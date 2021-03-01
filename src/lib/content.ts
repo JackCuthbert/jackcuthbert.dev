@@ -1,9 +1,11 @@
 import * as path from 'path'
 import { readdirSync, readFileSync } from 'fs'
-import matter from 'gray-matter'
 import renderToString from 'next-mdx-remote/render-to-string'
-import type { MdxRemote } from 'next-mdx-remote/types'
+import mdxPrism from 'mdx-prism'
+import matter from 'gray-matter'
 import { MDXComponents } from '../components/shared/MDXComponents'
+
+import type { MdxRemote } from 'next-mdx-remote/types'
 
 const root = path.join(process.cwd(), 'content')
 
@@ -44,7 +46,10 @@ export async function getFileBySlug(
 
   const { data, content } = matter(source)
   const mdxSource = await renderToString(content, {
-    components: MDXComponents
+    components: MDXComponents,
+    mdxOptions: {
+      rehypePlugins: [mdxPrism]
+    }
   })
 
   return {

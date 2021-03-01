@@ -1,4 +1,5 @@
 import '../styles/global.css'
+import '../styles/prism-dark.css'
 import React from 'react'
 import type { AppProps } from 'next/app'
 import { Footer } from '../components/shared/Footer'
