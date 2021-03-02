@@ -2,12 +2,12 @@ import React, { FC } from 'react'
 import type { GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import Link from 'next/link'
 import { Project } from '../components/Project'
 import { FrontMatter, getAllFilesFrontMatter } from '../lib/content'
 import { format } from 'date-fns'
 import { NowPlaying } from '../components/NowPlaying'
 import { PageContainer } from '../components/layout/PageContainer'
+import { CustomLink } from '../components/CustomLink'
 
 interface PageProps {
   posts: FrontMatter[]
@@ -35,7 +35,7 @@ const Page: NextPage<PageProps> = ({ posts }) => {
               height={128}
             />
           </div>
-          <h1 className="font-bold text-3xl mb-4">Yo, I'm Jack.</h1>
+          <h1 className="font-bold text-3xl mb-2">Yo, I'm Jack.</h1>
           <p className="text-gray-500 font-semibold text-xl mb-4 leading-relaxed">
             I'm a <Bold>full-stack software engineer</Bold> based in Melbourne
             with a passion for <Bold>product development</Bold> and{' '}
@@ -47,9 +47,9 @@ const Page: NextPage<PageProps> = ({ posts }) => {
         </div>
 
         <div className="mb-20">
-          <h2 className="text-2xl mb-8">Projects</h2>
+          <h2 className="text-2xl mb-6 font-bold">Projects</h2>
 
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             <Project
               name="Kaomoji.moe"
               summary="NLP-powered Slack App to send Japanese text emoticons"
@@ -73,33 +73,26 @@ const Page: NextPage<PageProps> = ({ posts }) => {
               summary="My actively maintained system config for Arch Linux"
               url="https://github.com/JackCuthbert/dotfiles"
             />
-
-            <Project
-              name="Sleepy Birb"
-              summary="A distraction-free Twitter proxy & browser extension"
-              url="https://github.com/JackCuthbert/sleepy-birb"
-            />
           </div>
         </div>
 
         <div className="mb-20">
-          <h2 className="text-2xl mb-8">Blog</h2>
-          <div className="grid grid-cols-1 gap-6">
+          <h2 className="text-2xl mb-4 font-bold">Blog</h2>
+          <div className="grid grid-cols-1 gap-2">
             {posts
               .sort((postA, postB) => {
                 return postA.date > postB.date ? -1 : 1
               })
               .map(post => (
-                <div className="flex items-center justify-between">
-                  <Link href={'/blog/' + post.slug}>
-                    <a className="font-bold text-black hover:bg-black hover:text-white">
-                      {post.title}
-                    </a>
-                  </Link>
-                  <span className="text-sm">
-                    {format(new Date(post.date), 'd LLL yy')}
-                  </span>
-                </div>
+                <CustomLink href={'/blog/' + post.slug} className="">
+                  <p className="font-semibold">
+                    <span className="text-gray-500">–</span>{' '}
+                    <span>{post.title}</span>{' '}
+                    <span className="text-gray-500 text-sm">
+                      {format(new Date(post.date), 'd LLL yy')}
+                    </span>
+                  </p>
+                </CustomLink>
               ))}
           </div>
         </div>

@@ -1,19 +1,9 @@
 import React from 'react'
 import { CustomLink } from '../CustomLink'
-import { NowPlaying } from '../NowPlaying'
 
 export function Footer(): JSX.Element {
   return (
     <div className="max-w-2xl mx-auto px-4 mb-8">
-      <div
-        className="border-t border-gray-300 mb-16"
-        style={{
-          borderImageSlice: '1',
-          borderImage:
-            'linear-gradient(270deg, hsla(216,40%,98%,1) 0%, hsla(214,23%,91%,1) 50%, hsla(216,40%,98%,1) 100%)'
-        }}
-      />
-
       <div className="grid grid-cols-3">
         <div className="flex flex-col space-y-4">
           <div>
