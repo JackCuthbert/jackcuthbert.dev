@@ -14,6 +14,7 @@ type ContentType = 'blog' | 'pages'
 export interface FrontMatter {
   title: string
   date: Date
+  /** Added during build */
   slug: string
 }
 

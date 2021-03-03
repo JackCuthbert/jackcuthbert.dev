@@ -20,7 +20,3 @@
 .prose h5 {
   @apply text-pink-500;
 }
-
-.shadow-brutal {
-  box-shadow: 5px 5px 0px #000;
-}

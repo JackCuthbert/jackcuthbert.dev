@@ -1,5 +1,6 @@
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const typography = require('@tailwindcss/typography')
+const colors = require('tailwindcss/colors')
 
 module.exports = {
   purge: [
@@ -9,6 +10,15 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
+      colors: {
+        purple: colors.violet,
+        green: colors.emerald,
+        blue: colors.lightBlue,
+        red: colors.rose
+      },
+      gridTemplateColumns: {
+        project: '1fr auto'
+      },
       fontFamily: {
         sans: ['Mulish', ...fontFamily.sans],
         mono: ['JetBrains Mono', ...fontFamily.mono]

@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@tailwindcss/typography": "^0.4.0",
+    "cntl": "^1.0.0",
     "date-fns": "^2.17.0",
     "gray-matter": "^4.0.2",
     "mdx-prism": "^0.3.1",
