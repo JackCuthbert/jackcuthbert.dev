@@ -5,13 +5,15 @@ updated: '2019-02-04'
 draft: false
 ---
 
+# Slimming Down node_modules in Docker Images
+
 Everyone knows the meme about the size of the `node_modules` folder so I'll try to make this one quick. You can (in some cases) drastically reduce the size of a resulting docker image by avoiding the inclusion of non-production node modules.
 
 ## Create a builder image
 
 This is an easy one, and probably something you're already used to doing. Create a Dockerfile as you would normally but this time we'll add an `as` keyword. This essentially creates a name for the current image in the `FROM` line.
 
-```docker{1}
+```docker:Dockerfile {1} showLineNumbers
 FROM node:8-alpine as builder
 WORKDIR /app
 
@@ -27,7 +29,7 @@ RUN npm run build
 
 We're also going to use the same `as` keyword in this image to tell the final image where to get the production dependencies from.
 
-```docker{1}
+```docker:Dockerfile {1} showLineNumbers
 FROM node:10-alpine as dependencies
 WORKDIR /app
 
@@ -41,7 +43,7 @@ RUN npm install --production
 
 Now we can **reference the previous images** using the `--from` argument _* gasps *_. This means we can compose a final image from all the previous stages **without** the `node_modules` bloat.
 
-```docker{5,8,11}
+```docker:Dockerfile {5,8,11} showLineNumbers
 FROM node:10-alpine
 WORKDIR /app
 

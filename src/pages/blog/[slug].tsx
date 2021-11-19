@@ -1,62 +1,43 @@
 import React from 'react'
-import hydrate from 'next-mdx-remote/hydrate'
-import { format } from 'date-fns'
-import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
-import { getFileBySlug, getSlugs, PostData } from '../../lib/content'
-import { useRouter } from 'next/router'
-import { PageContainer } from '../../components/layout/PageContainer'
-import { MDXComponents } from '../../components/shared/MDXComponents'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
+import { allPosts } from '.contentlayer/data'
+import { Post } from '.contentlayer/types'
+import { useMDXComponent } from 'next-contentlayer/hooks'
+import { WithLayout } from '../../types'
+import { getStandardLayout } from '../../layouts'
+import { MDXComponents } from '../../components/MDXComponents'
 
-const Page: NextPage<PostData> = ({ mdxSource, frontMatter }) => {
-  const router = useRouter()
-  const content = hydrate(mdxSource, {
-    components: MDXComponents
-  })
-
+const BlogPost: WithLayout<Post> = ({ title, body: { code } }) => {
+  const Component = useMDXComponent(code)
   return (
     <>
       <Head>
-        <title>{frontMatter.title} · Jack Cuthbert</title>
+        <title>{title} · Jack Cuthbert</title>
       </Head>
-      <PageContainer>
-        <div className="mb-20">
-          <button
-            onClick={() => router.back()}
-            className="font-bold text-black mb-1 sm:m-0 hover:bg-black hover:text-white"
-          >
-            🡰 Back
-          </button>
-        </div>
-        <article className="prose">
-          <h1 title={format(new Date(frontMatter.date), 'MMMM d, yyyy')}>
-            {frontMatter.title}
-          </h1>
-          {content}
-        </article>
-      </PageContainer>
+      <div className="prose">
+        <Component components={MDXComponents} />
+      </div>
     </>
   )
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  // 🐌
-  const slugs = getSlugs('blog')
-
+export const getStaticPaths: GetStaticPaths = () => {
+  const paths = allPosts.map(p => ({ params: { slug: p.slug } }))
+  console.log(paths)
   return {
-    paths: slugs.map(slug => ({
-      params: {
-        slug
-      }
-    })),
+    paths,
     fallback: false
   }
 }
 
-export const getStaticProps: GetStaticProps<PostData> = async ({ params }) => {
-  const post = await getFileBySlug('blog', params?.slug?.toString())
+export const getStaticProps: GetStaticProps = ({ params }) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const post = allPosts.find(post => post.slug === params?.slug)!
 
   return { props: post }
 }
 
-export default Page
+BlogPost.getLayout = getStandardLayout
+
+export default BlogPost

@@ -1,0 +1,73 @@
+pre {
+  overflow-x: auto;
+}
+
+.examples {
+  background-color: hsl(230, 8%, 24%);
+  background-color: hsl(230, 6%, 44%);
+  background-color: hsl(230, 4%, 64%);
+  background-color: hsl(198, 99%, 37%);
+  background-color: hsl(221, 87%, 60%);
+  background-color: hsl(301, 63%, 40%);
+  background-color: hsl(119, 34%, 47%);
+  background-color: hsl(5, 74%, 59%);
+  background-color: hsl(344, 84%, 43%);
+  background-color: hsl(35, 99%, 36%);
+  background-color: hsl(35, 99%, 40%);
+  background-color: hsl(230, 8%, 24%);
+  background-color: hsl(230, 1%, 98%);
+  background-color: hsl(230, 1%, 62%);
+  background-color: hsla(230, 8%, 24%, 0.2);
+  background-color: hsl(230, 100%, 66%);
+}
+
+/**
+ * Inspired by gatsby remark prism - https://www.gatsbyjs.com/plugins/gatsby-remark-prismjs/
+ * 1. Make the element just wide enough to fit its content.
+ * 2. Always fill the visible space in .code-highlight.
+ */
+.code-highlight {
+  float: left; /* 1 */
+  min-width: 100%; /* 2 */
+}
+
+.code-line {
+  display: block;
+  padding-left: 1em;
+  padding-right: 1em;
+  margin-left: -1em;
+  margin-right: -1em;
+  border-left-width: 2px;
+  border-left-color: transparent; /* Set code block color */
+}
+
+.code-line.inserted {
+  background-color: hsla(119, 34%, 47%, 0.2); /* Set inserted line (+) color */
+}
+
+.code-line.deleted {
+  background-color: hsla(5, 74%, 59%, 0.2); /* Set deleted line (-) color */
+}
+
+.highlight-line {
+  margin-left: -1em;
+  margin-right: -1em;
+  background-color: hsl(230, 1%, 90%); /* Set highlight bg color */
+  border-left-width: 2px;
+  border-left-color: hsl(221, 87%, 60%); /* Set highlight accent border color */
+}
+
+.line-number::before {
+  display: inline-block;
+  width: 1rem;
+  text-align: right;
+  margin-right: 1em;
+  margin-left: -8px;
+  color: hsl(230, 6%, 44%); /* Line number color */
+  content: attr(line);
+}
+
+.highlight-line.line-number::before {
+  color: hsl(230, 8%, 24%); /* Line number color */
+}
+

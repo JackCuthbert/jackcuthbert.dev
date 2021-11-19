@@ -18,7 +18,8 @@ module.exports = {
 
   variants: {
     extend: {
-      cursor: ['disabled']
+      cursor: ['disabled'],
+      translate: ['group-hover']
     }
   },
   plugins: [typography]

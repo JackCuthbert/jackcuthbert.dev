@@ -1,121 +1,111 @@
 import React, { FC } from 'react'
-import type { GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
-import Link from 'next/link'
-import { Project } from '../components/Project'
-import { FrontMatter, getAllFilesFrontMatter } from '../lib/content'
-import { format } from 'date-fns'
-import { NowPlaying } from '../components/NowPlaying'
-import { PageContainer } from '../components/layout/PageContainer'
+import { ExternalLink } from '../components/ExternalLink'
+import { FeaturedProject } from '../components/FeaturedProject'
+import { AnchorProps, WithLayout } from '../types'
+import { getStandardLayout } from '../layouts'
 
-interface PageProps {
-  posts: FrontMatter[]
+const ProseLink: FC<AnchorProps> = props => {
+  return (
+    <ExternalLink className="font-bold text-blue-500 underline" {...props} />
+  )
 }
 
-const Bold: FC = ({ children }) => (
-  <span className="text-gray-800 font-bold">{children}</span>
-)
-
-const Page: NextPage<PageProps> = ({ posts }) => {
+const Home: WithLayout = () => {
   return (
     <>
       <Head>
-        <title>Jack Cuthbert</title>
+        <title>Jack Cuthbert · Full-Stack Software Engineer</title>
       </Head>
-      <PageContainer>
-        <div className="mb-20">
-          <div className="mb-4">
-            <Image
-              layout="fixed"
-              className="rounded-full"
-              src="/images/avatar.jpg"
-              alt="Picture of Jack Cuthbert"
-              width={128}
-              height={128}
-            />
-          </div>
-          <h1 className="font-bold text-3xl mb-4">Yo, I'm Jack.</h1>
-          <p className="text-gray-500 font-semibold text-xl mb-4 leading-relaxed">
-            I'm a <Bold>full-stack software engineer</Bold> based in Melbourne
-            with a passion for <Bold>product development</Bold> and{' '}
-            <Bold>minimalist design</Bold>.
-          </p>
-          <div>
-            <NowPlaying />
-          </div>
+
+      <h1 className="font-black text-4xl mb-12">👋 Yo, I'm Jack.</h1>
+      <p className="mb-12 text-gray-800 text-xl pb-8 border-b-2 leading-relaxed">
+        I'm a <strong>full stack software engineer</strong> based in Melbourne,
+        Australia with a passion for{' '}
+        <strong>product development and design</strong>.
+      </p>
+
+      <div className="space-y-4 mb-12 leading-relaxed">
+        <p>
+          I currently work full-time as a Senior Software Engineer at{' '}
+          <ProseLink href="https://www.buenosystems.com.au/">BUENO</ProseLink>{' '}
+          where I <del>delete</del> write lots of TypeScript and{' '}
+          <del>sometimes</del> never break production. Previously I've worked in
+          both agency and product roles for{' '}
+          <ProseLink href="https://marketplacer.com/">Marketplacer</ProseLink>{' '}
+          and <ProseLink href="https://www.luminary.com/">Luminary</ProseLink>.
+        </p>
+        <p>
+          I have a background in user interface and web design after attending
+          Griffith University in Brisbane, Australia and graduating with a
+          Bachelor of Multimedia majoring in Internet Computing and Internet
+          Marketing.
+        </p>
+        <p>
+          I love working with{' '}
+          <ProseLink href="https://nodejs.org/en/">Node.js</ProseLink>,{' '}
+          <ProseLink href="https://www.typescriptlang.org/">
+            TypeScript
+          </ProseLink>
+          , <ProseLink href="https://reactjs.org/">React</ProseLink>,{' '}
+          <ProseLink href="https://kotlinlang.org/">Kotlin</ProseLink>, and{' '}
+          <ProseLink href="https://www.figma.com">Figma</ProseLink> but I'm
+          always keen to learn new things and trying out new ideas.
+        </p>
+      </div>
+
+      <h2 className="font-bold text-xl mb-8">My projects</h2>
+      <div className="grid grid-cols-1 gap-12 items-start sm:grid-cols-2 sm:gap-6 -mx-4 mt-4 mb-12">
+        <div className="grid grid-cols-1 gap-6 items-start">
+          <FeaturedProject
+            href="https://github.com/JackCuthbert/jackcuthbert.dev"
+            imageSrc="/jackcuthbert-dev-favicon.png"
+            name="jackcuthbert.dev"
+            year={2021}
+            description="My personal site, built with Next.js, TypeScript, and Tailwind. Statically generated content with MDX and dynamic API integrations."
+          />
+          <FeaturedProject
+            href="https://github.com/JackCuthbert/dotfiles"
+            imageSrc="/dotfiles-favicon.png"
+            name="dotfiles"
+            year={new Date().getFullYear()}
+            description="The configuration files for my Arch Linux systems. Vim and i3wm powered power user workflow."
+          />
         </div>
 
-        <div className="mb-20">
-          <h2 className="text-2xl mb-8">Projects</h2>
-
-          <div className="grid grid-cols-1 gap-6">
-            <Project
-              name="Kaomoji.moe"
-              summary="NLP-powered Slack App to send Japanese text emoticons"
-              url="https://kaomoji.moe"
-            />
-
-            <Project
-              name="slack-fm"
-              summary="Self-hosted service to sync Last.fm with Slack statuses"
-              url="https://github.com/JackCuthbert/slack-fm"
-            />
-
-            <Project
-              name="jackcuthbert.dev"
-              summary="My Next.js, TypeScript, and Tailwind CSS blog website"
-              url="https://github.com/JackCuthbert/jackcuthbert.dev"
-            />
-
-            <Project
-              name="dotfiles"
-              summary="My actively maintained system config for Arch Linux"
-              url="https://github.com/JackCuthbert/dotfiles"
-            />
-
-            <Project
-              name="Sleepy Birb"
-              summary="A distraction-free Twitter proxy & browser extension"
-              url="https://github.com/JackCuthbert/sleepy-birb"
-            />
-          </div>
+        <div className="grid grid-cols-1 gap-6 items-start">
+          <FeaturedProject
+            href="https://kaomoji.moe"
+            imageSrc="/kaomoji-favicon.png"
+            name="Kaomoji.moe"
+            year={2019}
+            description="A Slack app providing instant access to over 10,000 fun and unique Japanese kaomoji. Built with TypeScript, Next.js, and Google Cloud Run."
+          />
+          <FeaturedProject
+            href="https://github.com/JackCuthbert/slack-fm"
+            imageSrc="/slack-fm-favicon.png"
+            name="slack-fm"
+            year={2020}
+            description="A tiny self-hosted service that automatically updates your Slack status from your Last.fm profile just like in the good ol' days of MSN messenger."
+          />
         </div>
+      </div>
 
-        <div className="mb-20">
-          <h2 className="text-2xl mb-8">Blog</h2>
-          <div className="grid grid-cols-1 gap-6">
-            {posts
-              .sort((postA, postB) => {
-                return postA.date > postB.date ? -1 : 1
-              })
-              .map(post => (
-                <div className="flex items-center justify-between">
-                  <Link href={'/blog/' + post.slug}>
-                    <a className="font-bold text-black hover:bg-black hover:text-white">
-                      {post.title}
-                    </a>
-                  </Link>
-                  <span className="text-sm">
-                    {format(new Date(post.date), 'd LLL yy')}
-                  </span>
-                </div>
-              ))}
-          </div>
-        </div>
-      </PageContainer>
+      <h2 className="font-bold text-xl mb-8">Find me</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+        <ProseLink href="https://github.com/JackCuthbert">GitHub</ProseLink>
+        <ProseLink href="https://www.linkedin.com/in/jackcuthbert/">
+          LinkedIn
+        </ProseLink>
+        <ProseLink href="https://steamcommunity.com/id/xs1mple/">
+          Steam
+        </ProseLink>
+        <ProseLink href="https://last.fm/user/jckcthbrt">Last.fm</ProseLink>
+      </div>
     </>
   )
 }
 
-export const getStaticProps: GetStaticProps<PageProps> = async () => {
-  const files = getAllFilesFrontMatter('blog')
+Home.getLayout = getStandardLayout
 
-  return {
-    props: {
-      posts: files
-    }
-  }
-}
-
-export default Page
+export default Home

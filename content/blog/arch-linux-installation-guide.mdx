@@ -4,6 +4,8 @@ date: '2019-09-08'
 tags: ['linux']
 ---
 
+# Arch Linux Installation Guide
+
 This is my personal guide that I've used to install Arch on my various systems.
 Your mileage may vary when using this guide, always refer to the official
 documentation if you get stuck.
@@ -142,7 +144,7 @@ pacstrap /mnt base base-devel linux linux-firmware btrfs-progs zsh vim git sudo 
 
 Finally, generate an `/etc/fstab` file and make recommended adjustments
 
-```bash
+```bash:/etc/fstab
 genfstab -L /mnt >> /mnt/etc/fstab
 
 # For all btrfs filesystems consider:
@@ -194,7 +196,7 @@ echo '<hostname>' > /etc/hostname
 
 Add that hostname to `/etc/hosts`
 
-```
+```text
 127.0.0.1 localhost
 ::1       localhost
 127.0.1.1 <hostname>.localdomain <hostname>
@@ -216,7 +218,7 @@ passwd <username>
 Allow this user to use `sudo` by uncommenting the wheel group line after running
 the `visudo` command
 
-```
+```text
 %wheel ALL=(ALL) ALL
 ```
 
@@ -262,7 +264,7 @@ cryptsetup luksUUID /dev/<devName>p2
 
 Use the luks-uuid to create the bootloader entry in `/boot/loader/entries/arch.conf`
 
-```
+```text
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /amd-ucode.img # or /intel-ucode.img
@@ -275,7 +277,7 @@ options rw luks.uuid=<uuid> luks.name=<uuid>=luks root=/dev/mapper/luks rootflag
 
 Set default bootloader entry and options in `/boot/loader/loader.conf`
 
-```
+```text
 default	arch
 timeout 3 # if needed
 ```

@@ -4,6 +4,8 @@ date: '2019-09-22'
 draft: false
 ---
 
+# TypeScript & React Things I Wish I Knew Earlier
+
 During my quest to master TypeScript and React I've discovered some super
 helpful type definitions and syntax along the way that I wish I knew earlier.
 
@@ -42,7 +44,7 @@ make the compiler stop yelling at me.
 It would've looked something like this when using the older class component
 style.
 
-```tsx{2}
+```tsx {2}
 class MyInput extends React.Component {
   handleClick (event: React.SyntheticEvent<HTMLButtonElement>) {
     // do the thing with the stuff
@@ -61,7 +63,7 @@ element triggering the handler. This will work on all `<input>` elements,
 checkboxes too! Just be careful to have your runtime checks ensure that your
 handler is attached to the right kind of element.
 
-```tsx{4}
+```tsx {4}
 import React, { useCallback, FC, ChangeEvent } from 'react'
 
 const Input: FC<Props> = ({ onChange }) => {
@@ -76,7 +78,7 @@ const Input: FC<Props> = ({ onChange }) => {
 When using a click handler, React passes up the event parameter as a
 `React.MouseEvent<T>` – again `T` is the type of element triggering the handler.
 
-```tsx{4}
+```tsx {4}
 import React, { useCallback, FC, MouseEvent } from 'react'
 
 const Input: FC<Props> = ({ onChange }) => {
@@ -113,7 +115,7 @@ Then pass in whatever type of entity you like! The [Render Props](https://reactj
 it's being inferred by `MyComponent`. This is of course a very contrived example
 and your actual implementations may well be a lot more useful than this one.
 
-```tsx{11}
+```tsx {11}
 const items = [
   { name: 'one' },
   { name: 'two' }

@@ -1,43 +1,34 @@
 import React from 'react'
+import { GetStaticProps } from 'next'
+import { useMDXComponent } from 'next-contentlayer/hooks'
+import { allPages } from '.contentlayer/data'
+import type { Page } from '.contentlayer/types'
+import { MDXComponents } from '../components/MDXComponents'
+import { WithLayout } from '../types'
+import { getStandardLayout } from '../layouts'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
-import hydrate from 'next-mdx-remote/hydrate'
-import { getFileBySlug, PostData } from '../lib/content'
-import type { GetStaticProps, NextPage } from 'next'
-import { PageContainer } from '../components/layout/PageContainer'
 
-const Page: NextPage<PostData> = ({ mdxSource, frontMatter }) => {
-  const router = useRouter()
-  const content = hydrate(mdxSource)
+const Uses: WithLayout<Page> = ({ title, body: { code } }) => {
+  const Component = useMDXComponent(code)
 
   return (
     <>
       <Head>
-        <title>Uses · Jack Cuthbert</title>
+        <title>{title} · Jack Cuthbert</title>
       </Head>
-      <PageContainer>
-        <div className="mb-20">
-          <button
-            onClick={() => router.back()}
-            className="font-bold text-black mb-1 sm:m-0 hover:bg-black hover:text-white"
-          >
-            🡰 Back
-          </button>
-        </div>
-
-        <article className="prose">
-          <h1>{frontMatter.title}</h1>
-          {content}
-        </article>
-      </PageContainer>
+      <div className="prose">
+        <Component components={MDXComponents} />
+      </div>
     </>
   )
 }
 
-export const getStaticProps: GetStaticProps<PostData> = async () => {
-  const uses = await getFileBySlug('pages', 'uses')
+Uses.getLayout = getStandardLayout
 
+export const getStaticProps: GetStaticProps<Page> = () => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const uses = allPages.find(page => page.slug === 'uses')!
   return { props: uses }
 }
 
-export default Page
+export default Uses

@@ -5,6 +5,8 @@ tags: ['typescript', 'backend', 'serverless']
 draft: false
 ---
 
+# Verifying Cloud Scheduler requests in Google Cloud Run with TypeScript
+
 Part of the new system that I'm building for the V2 rewrite of [Kaomoji.moe](https://kaomojie.moe)
 needs to be able to run a task on some kind of schedule. This is a
 perfect job for [Cloud Scheduler](https://cloud.google.com/scheduler/) but the
@@ -68,7 +70,7 @@ It's a little heavy on the boilerplate code here but I've documented it as best
 I can. All of the following should be somewhere either the endpoint itself or
 some middleware for the endpoint.
 
-```ts
+```ts showLineNumbers
 import jwksClient from 'jwks-rsa'
 import jwt from 'jsonwebtoken'
 
@@ -134,7 +136,7 @@ supplied during the creation of the job (I use the endpoint the job is calling).
 
 All together this might look something like:
 
-```ts
+```ts showLineNumbers
 try {
   // ...snip... header validation
 
@@ -162,7 +164,7 @@ request before continuing with the business logic of the endpoint.
 
 Throw these checks in before attempting verifying the token:
 
-```ts
+```ts showLineNumbers
 if (req.headers.authorization === undefined) {
   return res.status(403).send('Missing authorization header')
 }

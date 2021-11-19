@@ -1,16 +1,17 @@
 module.exports = {
   extends: [
+    'next',
     'standard-with-typescript',
+    'standard-jsx',
     'standard-react',
-    'prettier',
-    'prettier/@typescript-eslint',
-    'prettier/standard',
-    'prettier/react'
+    'prettier'
   ],
   plugins: ['prettier'],
   rules: {
     'prettier/prettier': 'error',
-    'react/prop-types': 'off'
+    'react/prop-types': 'off',
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'error'
   },
   parserOptions: {
     project: ['./tsconfig.json']
