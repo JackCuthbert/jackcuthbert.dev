@@ -8,6 +8,9 @@ import { WithLayout } from '../types'
 import { getStandardLayout } from '../layouts'
 import Head from 'next/head'
 
+const pageDescription =
+  "Inspired by the uses.tech site this is a mostly up to date list of the things I use day to day to do what I do. I'll link to as many things as I can."
+
 const Uses: WithLayout<Page> = ({ title, body: { code } }) => {
   const Component = useMDXComponent(code)
 
@@ -15,6 +18,8 @@ const Uses: WithLayout<Page> = ({ title, body: { code } }) => {
     <>
       <Head>
         <title>{title} · Jack Cuthbert</title>
+        <meta property="description" content={pageDescription} />
+        <meta property="og:description" content={pageDescription} />
       </Head>
       <div className="prose">
         <Component components={MDXComponents} />

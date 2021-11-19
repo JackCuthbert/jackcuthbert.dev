@@ -14,6 +14,7 @@ const Blog: WithLayout<{ posts: Post[] }> = ({ posts }) => {
     <>
       <Head>
         <title>Blog · Jack Cuthbert</title>
+        <meta property="og:type" content="website" />
       </Head>
       <h1 className="font-black text-4xl mb-6">Blog</h1>
       <UnderConstructionPanel />

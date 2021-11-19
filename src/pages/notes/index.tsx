@@ -9,6 +9,7 @@ const Notes: WithLayout = () => {
     <>
       <Head>
         <title>Notes · Jack Cuthbert</title>
+        <meta property="og:type" content="website" />
       </Head>
       <h1 className="font-black text-4xl mb-6">Notes</h1>
       <UnderConstructionPanel />

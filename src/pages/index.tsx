@@ -11,11 +11,17 @@ const ProseLink: FC<AnchorProps> = props => {
   )
 }
 
+const pageDescription =
+  "I'm a full stack software engineer based in Melbourne, Australia with a passion for product development and design."
+
 const Home: WithLayout = () => {
   return (
     <>
       <Head>
         <title>Jack Cuthbert · Full-Stack Software Engineer</title>
+        <meta property="og:type" content="website" />
+        <meta property="description" content={pageDescription} />
+        <meta property="og:description" content={pageDescription} />
       </Head>
 
       <h1 className="font-black text-4xl mb-12">👋 Yo, I'm Jack.</h1>

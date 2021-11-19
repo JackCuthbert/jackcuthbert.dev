@@ -10,10 +10,18 @@ import { MDXComponents } from '../../components/MDXComponents'
 
 const BlogPost: WithLayout<Post> = ({ title, body: { code } }) => {
   const Component = useMDXComponent(code)
+  const pageTitle = `${title} · Jack Cuthbert`
   return (
     <>
       <Head>
-        <title>{title} · Jack Cuthbert</title>
+        <title>{pageTitle}</title>
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:type" content="article" />
+        {/* TODO: Summary in the description field */}
+        {/* <meta property="description" content={pageDescription} />, */}
+        {/* <meta property="og:description" content={pageDescription} /> */}
+        {/* TODO: OG Images */}
+        {/* <meta property="og:image" content={'???'} /> */}
       </Head>
       <div className="prose">
         <Component components={MDXComponents} />
