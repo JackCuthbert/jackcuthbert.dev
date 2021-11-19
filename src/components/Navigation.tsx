@@ -36,7 +36,7 @@ const NavItem: FC<{ href: string; className?: string }> = ({
 
 export function Navigation(): JSX.Element {
   return (
-    <nav className="flex items-center space-x-4 mt-4 mb-16">
+    <nav className="flex items-center space-x-4 mb-16">
       <Link href="/">
         <a>
           <Image

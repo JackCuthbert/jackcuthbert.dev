@@ -13,11 +13,7 @@ interface Props extends AppProps {
 function App({ Component, pageProps }: Props): JSX.Element {
   const getLayout = Component.getLayout ?? (page => page)
 
-  return (
-    <div className="h-screen bg-gray-50 overflow-auto">
-      {getLayout(<Component {...pageProps} />)}
-    </div>
-  )
+  return <>{getLayout(<Component {...pageProps} />)}</>
 }
 
 export default App
