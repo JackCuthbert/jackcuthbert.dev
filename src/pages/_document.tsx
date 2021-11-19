@@ -8,6 +8,7 @@ import Document, {
 } from 'next/document'
 
 import { Favicon } from '../components/Favicon'
+import { ClickyScript } from '../components/ClickyScript'
 
 class CustomDocument extends Document {
   static async getInitialProps(
@@ -26,6 +27,7 @@ class CustomDocument extends Document {
         </Head>
         <body>
           <Main />
+          <ClickyScript />
           <NextScript />
         </body>
       </Html>
