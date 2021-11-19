@@ -7,10 +7,17 @@ import { useMDXComponent } from 'next-contentlayer/hooks'
 import { WithLayout } from '../../types'
 import { getStandardLayout } from '../../layouts'
 import { MDXComponents } from '../../components/MDXComponents'
+import { OldPostPanel } from '../../components/OldPostPanel'
+import { differenceInDays } from 'date-fns'
 
-const BlogPost: WithLayout<Post> = ({ title, body: { code } }) => {
+const now = new Date()
+
+const BlogPost: WithLayout<Post> = ({ title, date, slug, body: { code } }) => {
   const Component = useMDXComponent(code)
   const pageTitle = `${title} · Jack Cuthbert`
+  const postDate = new Date(date)
+  const overOneYearOld = differenceInDays(now, postDate) > 365
+
   return (
     <>
       <Head>
@@ -23,6 +30,11 @@ const BlogPost: WithLayout<Post> = ({ title, body: { code } }) => {
         {/* TODO: OG Images */}
         {/* <meta property="og:image" content={'???'} /> */}
       </Head>
+      {overOneYearOld && (
+        <div className="mb-6">
+          <OldPostPanel slug={slug} />
+        </div>
+      )}
       <div className="prose">
         <Component components={MDXComponents} />
       </div>
