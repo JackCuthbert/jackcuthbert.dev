@@ -1,0 +1,172 @@
+---
+title: Intel NUC GPU passthrough in Proxmox 6.1 with Plex and Docker
+date: '2020-04-26'
+tags: ['backend', 'linux']
+---
+
+# Intel NUC GPU passthrough in Proxmox 6.1 with Plex and Docker
+
+Plex is a fantastic piece of software that when combined with a [Plex Pass](https://www.plex.tv/plex-pass/)
+subscription allows for [hardware-accelerated transcoding](https://support.plex.tv/articles/115002178853-using-hardware-accelerated-streaming/)
+of video streams. Before jumping from a bare-metal home server setup on Ubuntu
+18.04 to one virtualised in a Proxmox node I found that many people seem to be
+having great difficulty in getting this working.
+
+After a lot of research I've managed to configure my Intel NUC running Proxmox
+VE 6.1-8 to passthrough the integrated GPU on the i5-8259U CPU to a guest VM
+running Ubuntu 20.04 and Docker that enables hardware transcoding of video
+streams from a Plex server.
+
+## Proxmox setup
+
+First you need to enable **IOMMU** in the Proxmox host. This allows for the PCI
+passthrough option to become available in the GUI.
+
+```bash
+nano /etc/default/grub
+```
+
+Then add `intel_iommu=on` to the `GRUB_CMDLINE_LINUX_DEFAULT` option. It should
+look like this:
+
+```text
+GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on"
+```
+
+Next, add the required kernel modules to `/etc/modules`:
+
+```text
+vfio
+vfio_iommu_type1
+vfio_pci
+vfio_virqfd
+```
+
+Finally, `update-grub` and `reboot`!
+
+## VM setup
+
+My Plex instance runs inside an Ubuntu 20.04 VM running [Docker Engine](https://docs.docker.com/engine/install/ubuntu/)
+with access to 4 vCPUs of type "host" using [Docker Compose](https://docs.docker.com/compose/) (more on this later).
+
+<Image
+  alt="VM CPU Configuration"
+  height={273}
+  src="/images/blog/intel-nuc-gpu-passthrough-in-proxmox-plex-docker/host-cpus.png"
+  width={927}
+/>
+
+### Identify the GPU
+
+Once the VM is set up, SSH into the **Proxmox host** and figure out which PCI
+device is the GPU we want to pass through to the guest using the `lspci`
+command. The output will look something like this:
+
+```bash {3}
+root@proxmox:~# lspci
+00:00.0 Host bridge: Intel Corporation 8th Gen Core Processor Host Bridge/DRAM Registers (rev 08)
+00:02.0 VGA compatible controller: Intel Corporation Iris Plus Graphics 655 (rev 01)
+00:08.0 System peripheral: Intel Corporation Skylake Gaussian Mixture Model
+00:12.0 Signal processing controller: Intel Corporation Cannon Point-LP Thermal Controller (rev 30)
+00:14.0 USB controller: Intel Corporation Cannon Point-LP USB 3.1 xHCI Controller (rev 30)
+00:14.2 RAM memory: Intel Corporation Cannon Point-LP Shared SRAM (rev 30)
+00:14.3 Network controller: Intel Corporation Cannon Point-LP CNVi [Wireless-AC] (rev 30)
+# ... snip ...
+```
+
+Notice on the line that's highlighted we've found the GPU we want to use, the
+identifier for "Intel Corporation Iris Plus Graphics 655" is `00:02.0`.
+This is what we will select when adding hardware to the VM.
+
+### Add the PCI device to the guest
+
+/blog/intel-nuc-gpu-passthrough-in-proxmox-plex-docker
+
+Using this identify, you'll need to add a PCI device to the guest using the
+"Hardware" tab, "Add", "PCI Device".
+
+<Image
+  alt="Add PCI device menu"
+  height={289}
+  src="/images/blog/intel-nuc-gpu-passthrough-in-proxmox-plex-docker/add-pci-hardware.png"
+  width={1024}
+/>
+
+The modal that pops up is where we'll select the the device with that
+identifier.  Select it, and make sure "All Functions" is ticked and "Primary
+GPU" is **not** ticked.
+
+<Image
+  alt="Select PCI hardware"
+  height={359}
+  src="/images/blog/intel-nuc-gpu-passthrough-in-proxmox-plex-docker/select-pci-hardware.png"
+  width={923}
+/>
+
+> I'm not entirely clear on what "All Functions" does, but having this ticked
+> works for me.
+
+Finally reboot the VM and SSH or VNC to it and run `lspci`. If you see the
+`00:02.0` identifier in the output it works!
+
+> Disclaimer: I'm not 100% on whether the CPU type of "host" or the PCI
+> passthrough configuration is what makes this work. This is what worked for me
+> after trying multiple variations of similar things.
+
+### Mount the device to the Plex container
+
+The last and definitely the easiest part is mounting the device to the Plex
+container. A simple `docker-compose.yml` should illustrate this nicely:
+
+```yml:docker-compose.yml {14-15}
+version: '3.7'
+
+services:
+  plex:
+    # ... snip ...
+    image: linuxserver/plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+    volumes:
+      # ... snip ...
+    devices:
+      - /dev/dri:/dev/dri
+```
+
+The last few highlighted lines of this file mount the `/dev/dri` device to the
+container. All that's left is to enable hardware transcoding in the "Transcoder"
+settings in Plex.
+
+> [ksurl](https://github.com/ksurl) on GitHub pointed out that they needed to
+make sure the user running plex (the UID value in the container environment
+variable) had permission to access `/dev/dri`.
+> To resolve this, they
+added that user to the `video` group with: `sudo usermod -a -G video <username>`.
+
+<Image
+  alt="Hardware transcoding option"
+  height={379}
+  src="/images/blog/intel-nuc-gpu-passthrough-in-proxmox-plex-docker/enable-hw-transcode.png"
+  width={1116}
+/>
+
+To check this worked, start playing something, adjust the quality options to
+trigger a transcode, and take a look at the dashboard.
+
+<Image
+  alt="Dashboard showing HW transcode"
+  height={658}
+  src="/images/blog/intel-nuc-gpu-passthrough-in-proxmox-plex-docker/transcode-sample.png"
+  width={1141}
+/>
+
+If you're seeing `Transcode (hw)` in the now playing section you've successfully
+set up GPU passthrough in Proxmox to a guest VM 🎉
+
+## References
+
+* [Proxmox Wiki - PCI Passthrough](https://pve.proxmox.com/wiki/Pci_passthrough#Enable_the_IOMMU)
+* [Linuxserver.io - Plex](https://docs.linuxserver.io/images/docker-plex)
