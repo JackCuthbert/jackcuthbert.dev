@@ -1,0 +1,193 @@
+---
+title: Managing a monorepo with Lerna, TypeScript, React, and Jest
+date: '2019-03-01'
+tags: ['typescript', 'frontend']
+---
+
+# Managing a monorepo with Lerna, TypeScript, React, and Jest
+
+<Image
+  alt="Screenshot of the component library"
+  src="/images/blog/managing-a-monorepo-with-lerna-typescript-react-jest/component-library.png"
+  width={1200}
+  height={800}
+/>
+
+Recently at [my day job](/about) I've had the relative luxury of building out our very first iteration of a design system and component library. The components are built with [TypeScript](https://www.typescriptlang.org/), [React](https://reactjs.org/), and [styled-components](https://www.styled-components.com/). We deploy all this using [Lerna](https://lernajs.io/) to a privately hosted NPM registry with [Nexus Repository Manager](https://www.sonatype.com/nexus-repository-sonatype).
+
+Now that the buzzwords are out of the way, let's get started. This post details my findings while laying the groundwork for a small team of frontend specialists to contribute code to a number of products from a single repository.
+
+> This post assumes that the reader has read some or all of the documentation on the [Lerna](https://lernajs.io/) website or [GitHub repository](https://github.com/lerna/lerna) and has some familiarity with packaging node modules for NPM.
+
+## Lerna
+
+We opted for a monorepo straight out of the gate for a couple reasons. We have a relatively immature frontend codebase with lots of duplication and we wanted a single source of truth for all of our UI code. Lerna allows us to use a single git repository to manage and publish NPM packages to either the official NPM registry or a privately hosted one.
+
+### Dependencies
+
+If you're adding a new dependency to a package, use `lerna add`. This manages both the installation and the symlinking of packages, local or remote. To add a remote dependency like `lodash.throttle`, use `lerna add` and specify either a path to your package or a `--scope` flag.
+
+```bash
+npx lerna add lodash.throttle ./packages/my-package
+# OR
+npx lerna add lodash.throttle --scope @myorg/my-package
+```
+
+In our case we also have local dependencies where one managed package depends on another. Using the same command, Lerna is able to install and symlink a local dependency by specifying the package name.
+
+```bash
+npx lerna add @myorg/my-package ./packages/my-other-package
+# OR
+npx lerna add @myorg/my-package --scope @myorg/my-other-package
+```
+
+Peer dependencies such as `react`, `react-dom`, or `styled-components` should be added in the relevant `package.json` using carat notation. They should then be installed as `devDependencies`  **at the root of the repository** using the traditional `npm install react -D`. This ensures that during development everything is available to compilation and your editor.
+
+```json:./packages/<package_name>/package.json
+{
+  "peerDependencies": {
+    "react": "^16.8",
+    "react-dom": "^16.8",
+    "styled-components": "^4.1"
+  }
+}
+```
+
+```json:./package.json
+{
+  "devDependencies": {
+    "react": "^16.8",
+    "react-dom": "^16.8",
+    "styled-components": "^4.1"
+  }
+}
+```
+
+> `@types` packages should also be installed at the **root** of the repository as a development dependency
+
+### package-lock.json
+
+**Never** run `npm install` in any package, this will (by default) add in a `package-lock.json` to each package and cause dependency hell when attempting to increment versions or update dependent packages. The only `package-lock.json` file should be at the root of the repository. Figuring this one out the hard way sucked.
+
+### .npmrc
+
+This one really threw me for a loop. In more recent versions of Lerna (3.13.0 at the time of writing), Lerna seems to use the `.npmrc` file as the first _and last_ place to look for registry and scope settings. We check this file into source control in our products so we don't need to have every developer set up the private registry on their machine more than once.
+
+We're currently using Nexus Repository Manager and we specify the _group_ repository in this `.npmrc` file for installing our private packages. What this means though, is that we can't publish to it.
+
+> It’s important to note that a group doesn’t store components. You cannot publish or deploy components directly to it. – [Lesson 3: Creating and Managing Repository Groups](https://help.sonatype.com/learning/repository-manager-3/first-time-installation-and-setup/lesson-3%3A-creating-and-managing-repository-groups#Lesson3:CreatingandManagingRepositoryGroups-CharacteristicsofaRepositoryGroup)
+
+Using the `--registry`, registry config in `lerna.json`, or the `publishConfig` settings in each `package.json` to set the target registry _did not work_ with a `.npmrc` file specifying the _group_ repository. Changing this over to the _hosted_ repository URL resolved this.
+
+### Publishing
+
+I started out using the default versioning behaviour where Lerna will ask for a new version for every package on every publish. We quickly found that this was putting a lot of stress on developers (aka. me) to keep the main products `package.json` files up to date and select correct versions for each package.
+
+Now we're using the [from-package positional](https://github.com/lerna/lerna/tree/master/commands/publish#bump-from-package). Instead of publishing every package on every call to `lerna publish`, this checks the registry for existing versions and compares those against the versions specified in the local `package.json` files. If there's a difference, it'll only publish the differing packages.
+
+This means the workflow for publishing a new version now becomes:
+
+1. Write your code
+2. Increment the version in `package.json`
+3. `git commit`
+4. `npm run publish`
+
+## TypeScript
+
+As with any TypeScript project, every package benefits from a `tsconfig.json` file and some custom configuration. When packaging with Lerna, we need to specify a few things in a `tsconfig.json` and our `package.json` file.
+
+Make sure that `main`, `typings`, and a `prepublishOnly` script is defined in all TypeScript `package.json` files and `declaration` is set to `true` in `tsconfig.json`. These fields tell the consuming codebase where the type definitions are, what the entry point is, and most importantly how to build each pacakge.
+
+```json:./packages/<package_name>/package.json {4,5,7}
+{
+  "name": "@myorg/components",
+  "version": "1.2.3",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "tsc"
+  }
+}
+```
+
+> This assumes that the entry point of your packages are named `index.ts`
+
+### tsconfig.json
+
+As we're building everything in TypeScript, each package defines its own `tsconfig.json` which all extend a single `tsconfig.settings.json` file placed inside the `./packages` folder. The following is as close to the bare-minimum configuration that our particular project needs.
+
+```json:./packages/tsconfig.settings.json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "jsx": "react"
+  }
+}
+```
+
+```json:./packages/my-package/tsconfig.json {4}
+{
+  "extends": "../tsconfig.settings.json",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  }
+}
+```
+
+> Pay attention to the `outDir` in `tsconfig.json`. This should be set to the same location defined in the `main` field in `package.json`.
+
+## Testing
+
+To test our code, we're using [Jest](https://jestjs.io/) (v24 with Babel to transpile TypeScript) and [Enzyme](https://airbnb.io/enzyme/). Much of the setup was very straightforward after following the relevant documentation.
+
+A big gotcha that doesn't seem to be documented anywhere is that Jest requires the TypeScript packages to be built before running tests even though babel will be working for the test files themselves. I resolved this by implementing a `pretest` script that runs the build before tests are run, and a convenience `test:only` script for when developers are only writing tests and not updating component code.
+
+```js:babel.config.js
+module.exports = {
+  presets: [
+    '@babel/preset-react',
+    '@babel/preset-typescript',
+    [
+      '@babel/preset-env',
+      {
+        useBuiltIns: 'entry'
+      }
+    ],
+  ]
+}
+```
+
+> Pay attention to the name of this file, Jest 24 + TypeScript only worked for me when naming it `babel.config.js` and not `.babelrc` or `.babrlrc.js`.
+
+```js:jest.config.js
+module.exports = {
+  moduleFileExtensions: ['ts', 'tsx', 'js'],
+  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '(/__tests__/.*|(\\.|/)(test|spec))\\.d\.ts$'
+  ],
+  snapshotSerializers: ['enzyme-to-json/serializer'],
+  setupFilesAfterEnv: ['<rootDir>packages/setupTests.ts'],
+  // ...
+}
+```
+
+## Closing thoughts
+
+We're now managing 5 packages and an increasing number of bespoke React components with Lerna. Our small team is able to build out new components as quickly as they're designed with confidence in an isolated environment ([Docz](https://docz.site/)). As the team grows I'm looking forward to seeing how this framework helps us improve our code quality and ability to scale our UI over time.
+
+### Resources
+
+* [Lerna on GitHub](https://github.com/lerna/lerna)
+* [@evocateur on lerna add](https://github.com/lerna/lerna/issues/1839#issuecomment-450672096)
+* [markvincze/lerna-typescript-demo](https://github.com/markvincze/lerna-typescript-demo)
+* [Setting up a monorepo with Lerna for a TypeScript project](https://blog.logrocket.com/setting-up-a-monorepo-with-lerna-for-a-typescript-project-b6a81fe8e4f8)
+* [Using enzyme with Jest (GitHub)](https://github.com/airbnb/enzyme/blob/master/docs/guides/jest.md)
+
