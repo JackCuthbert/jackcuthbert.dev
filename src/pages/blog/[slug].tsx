@@ -24,7 +24,6 @@ const BlogPost: WithLayout<Post> = ({ title, body: { code } }) => {
 
 export const getStaticPaths: GetStaticPaths = () => {
   const paths = allPosts.map(p => ({ params: { slug: p.slug } }))
-  console.log(paths)
   return {
     paths,
     fallback: false
