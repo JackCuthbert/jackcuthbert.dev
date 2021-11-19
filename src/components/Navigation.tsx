@@ -2,6 +2,7 @@ import Image from 'next/image'
 import React, { FC } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import { constrainWidthClass } from '../layouts/StandardLayout'
 
 const activeClass = 'font-bold'
 const sharedClass = 'inline-block px-3 py-2 rounded-md transition-all transform'
@@ -36,24 +37,26 @@ const NavItem: FC<{ href: string; className?: string }> = ({
 
 export function Navigation(): JSX.Element {
   return (
-    <nav className="flex items-center space-x-4 mb-16">
-      <Link href="/">
-        <a>
-          <Image
-            src="/images/avatar.jpg"
-            alt="A photo of Jack Cuthbert"
-            width={32}
-            height={32}
-            className="rounded-full"
-          />
-        </a>
-      </Link>
-      <div>
-        <NavItem href="/">Home</NavItem>
-        <NavItem href="/blog">Blog</NavItem>
-        <NavItem href="/notes">Notes</NavItem>
-        <NavItem href="/uses">Uses</NavItem>
-      </div>
-    </nav>
+    <div className={`${constrainWidthClass} sticky top-0 z-50`}>
+      <nav className="flex items-center space-x-4 mb-14 py-2 bg-gray-50 bg-opacity-90 backdrop-filter backdrop-blur-sm">
+        <Link href="/">
+          <a>
+            <Image
+              src="/images/avatar.jpg"
+              alt="A photo of Jack Cuthbert"
+              width={32}
+              height={32}
+              className="rounded-full"
+            />
+          </a>
+        </Link>
+        <div>
+          <NavItem href="/">Home</NavItem>
+          <NavItem href="/blog">Blog</NavItem>
+          <NavItem href="/notes">Notes</NavItem>
+          <NavItem href="/uses">Uses</NavItem>
+        </div>
+      </nav>
+    </div>
   )
 }
