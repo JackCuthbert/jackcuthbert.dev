@@ -6,30 +6,8 @@ body {
   @apply bg-gray-50;
 }
 
-.prose a {
-  @apply text-blue-500 !important;
-}
-
+/* TODO: Likely should belong in the next.config.js file */
 .prose > ul > li > ul {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
-}
-
-
-/* Use prism-gh.css borders on top of prism-onelight.css */
-/* Code blocks */
-pre[class*="language-"] {
-  @apply border !important;
-  @apply bg-gray-50 !important;
-}
-
-.rehype-code-title {
-  font-size: 14px; /* same as .prose code (0.875em) */
-  margin-bottom: -7px; /* cancel out code blocks top margin (1em) */
-  margin-top: 7px; /* re-apply code blocks top margin above title (1em) */
-  @apply font-mono font-bold;
-}
-
-.rehype-code-title::before {
-  content: '📄 ';
 }

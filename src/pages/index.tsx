@@ -1,15 +1,9 @@
-import React, { FC } from 'react'
+import React from 'react'
 import Head from 'next/head'
-import { ExternalLink } from '../components/ExternalLink'
+import { Anchor } from '../components/Anchor'
 import { FeaturedProject } from '../components/FeaturedProject'
-import { AnchorProps, WithLayout } from '../types'
+import { WithLayout } from '../types'
 import { getStandardLayout } from '../layouts'
-
-const ProseLink: FC<AnchorProps> = props => {
-  return (
-    <ExternalLink className="font-bold text-blue-500 underline" {...props} />
-  )
-}
 
 const pageDescription =
   "I'm a full stack software engineer based in Melbourne, Australia with a passion for product development and design."
@@ -34,12 +28,12 @@ const Home: WithLayout = () => {
       <div className="space-y-4 mb-12 leading-relaxed">
         <p>
           I currently work full-time as a Senior Software Engineer at{' '}
-          <ProseLink href="https://www.buenosystems.com.au/">BUENO</ProseLink>{' '}
-          where I <del>delete</del> write lots of TypeScript and{' '}
-          <del>sometimes</del> never break production. Previously I've worked in
-          both agency and product roles for{' '}
-          <ProseLink href="https://marketplacer.com/">Marketplacer</ProseLink>{' '}
-          and <ProseLink href="https://www.luminary.com/">Luminary</ProseLink>.
+          <Anchor href="https://www.buenosystems.com.au/">BUENO</Anchor> where I{' '}
+          <del>delete</del> write lots of TypeScript and <del>sometimes</del>{' '}
+          never break production. Previously I've worked in both agency and
+          product roles for{' '}
+          <Anchor href="https://marketplacer.com/">Marketplacer</Anchor> and{' '}
+          <Anchor href="https://www.luminary.com/">Luminary</Anchor>.
         </p>
         <p>
           I have a background in user interface and web design after attending
@@ -49,14 +43,12 @@ const Home: WithLayout = () => {
         </p>
         <p>
           I love working with{' '}
-          <ProseLink href="https://nodejs.org/en/">Node.js</ProseLink>,{' '}
-          <ProseLink href="https://www.typescriptlang.org/">
-            TypeScript
-          </ProseLink>
-          , <ProseLink href="https://reactjs.org/">React</ProseLink>,{' '}
-          <ProseLink href="https://kotlinlang.org/">Kotlin</ProseLink>, and{' '}
-          <ProseLink href="https://www.figma.com">Figma</ProseLink> but I'm
-          always keen to learn new things and trying out new ideas.
+          <Anchor href="https://nodejs.org/en/">Node.js</Anchor>,{' '}
+          <Anchor href="https://www.typescriptlang.org/">TypeScript</Anchor>,{' '}
+          <Anchor href="https://reactjs.org/">React</Anchor>,{' '}
+          <Anchor href="https://kotlinlang.org/">Kotlin</Anchor>, and{' '}
+          <Anchor href="https://www.figma.com">Figma</Anchor> but I'm always
+          keen to learn new things and trying out new ideas.
         </p>
       </div>
 
@@ -99,14 +91,12 @@ const Home: WithLayout = () => {
 
       <h2 className="font-bold text-xl mb-8">Find me</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-        <ProseLink href="https://github.com/JackCuthbert">GitHub</ProseLink>
-        <ProseLink href="https://www.linkedin.com/in/jackcuthbert/">
+        <Anchor href="https://github.com/JackCuthbert">GitHub</Anchor>
+        <Anchor href="https://www.linkedin.com/in/jackcuthbert/">
           LinkedIn
-        </ProseLink>
-        <ProseLink href="https://steamcommunity.com/id/xs1mple/">
-          Steam
-        </ProseLink>
-        <ProseLink href="https://last.fm/user/jckcthbrt">Last.fm</ProseLink>
+        </Anchor>
+        <Anchor href="https://steamcommunity.com/id/xs1mple/">Steam</Anchor>
+        <Anchor href="https://last.fm/user/jckcthbrt">Last.fm</Anchor>
       </div>
     </>
   )

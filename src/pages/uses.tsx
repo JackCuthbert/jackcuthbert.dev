@@ -21,7 +21,7 @@ const Uses: WithLayout<Page> = ({ title, body: { code } }) => {
         <meta property="description" content={pageDescription} />
         <meta property="og:description" content={pageDescription} />
       </Head>
-      <div className="prose">
+      <div className="prose prose-blue">
         <Component components={MDXComponents} />
       </div>
     </>

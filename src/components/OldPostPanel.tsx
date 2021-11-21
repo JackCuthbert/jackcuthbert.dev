@@ -1,5 +1,5 @@
 import React from 'react'
-import { ExternalLink } from './ExternalLink'
+import { Anchor } from './Anchor'
 
 // TODO: This is a bit of a mess, definitely needs cleaning up or an API integration
 
@@ -22,17 +22,10 @@ export function OldPostPanel({ slug }: Props): JSX.Element {
       <p>
         This post is over 1 year old and may be out of date or no longer
         relevant. If you find any problems with this post you can let me know by{' '}
-        <ExternalLink
-          className="font-bold underline"
-          href="https://github.com/JackCuthbert/jackcuthbert.dev/issues/new"
-        >
+        <Anchor href="https://github.com/JackCuthbert/jackcuthbert.dev/issues/new">
           submitting an issue
-        </ExternalLink>{' '}
-        or{' '}
-        <ExternalLink className="font-bold underline" href={getGitHubUrl(slug)}>
-          editing this page
-        </ExternalLink>
-        .
+        </Anchor>{' '}
+        or <Anchor href={getGitHubUrl(slug)}>editing this page</Anchor>.
       </p>
     </div>
   )

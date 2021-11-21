@@ -1,6 +1,7 @@
 import { NextPage } from 'next'
 import { AnchorHTMLAttributes, DetailedHTMLProps } from 'react'
 
+/** Alias for the props available to <a /> */
 export type AnchorProps = DetailedHTMLProps<
   AnchorHTMLAttributes<HTMLAnchorElement>,
   HTMLAnchorElement

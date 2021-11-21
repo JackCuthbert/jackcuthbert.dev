@@ -13,6 +13,18 @@ module.exports = {
       fontFamily: {
         sans: ['Mulish', ...fontFamily.sans],
         mono: ['JetBrains Mono', ...fontFamily.mono]
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            a: {
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline'
+              }
+            }
+          }
+        }
       }
     }
   },

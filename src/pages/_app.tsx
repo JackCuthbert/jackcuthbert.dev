@@ -2,6 +2,8 @@ import '../styles/fonts.css'
 import '../styles/global.css'
 import '../styles/prism-onelight.css'
 import '../styles/prism-highlight-lines.css'
+import '../styles/prism-custom.css'
+
 import React from 'react'
 import Head from 'next/head'
 import type { AppProps } from 'next/app'

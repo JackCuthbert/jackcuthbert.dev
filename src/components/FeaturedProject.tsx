@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import React from 'react'
-import { ExternalLink } from './ExternalLink'
+import { Anchor } from './Anchor'
 
 interface Props {
   href: string
@@ -19,7 +19,7 @@ export function FeaturedProject({
 }: Props): JSX.Element {
   return (
     // TODO: Fix hover on edges
-    <ExternalLink
+    <Anchor
       href={href}
       className="group transform hover:bg-white p-4 hover:-translate-y-1 transition-all rounded-lg hover:shadow-md"
     >
@@ -28,6 +28,6 @@ export function FeaturedProject({
         {name} <span className="text-gray-400 font-normal">{year}</span>
       </h3>
       <p>{description}</p>
-    </ExternalLink>
+    </Anchor>
   )
 }
