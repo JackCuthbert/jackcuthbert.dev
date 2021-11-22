@@ -2,12 +2,13 @@ const { fontFamily } = require('tailwindcss/defaultTheme')
 const typography = require('@tailwindcss/typography')
 
 module.exports = {
+  mode: 'jit',
+  darkMode: false, // or 'media' or 'class'
   purge: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
     './src/components/**/*.{js,ts,jsx,tsx}',
     './src/layouts/**/*.{js,ts,jsx,tsx}'
   ],
-  darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
       fontFamily: {
@@ -28,12 +29,6 @@ module.exports = {
       }
     }
   },
-
-  variants: {
-    extend: {
-      cursor: ['disabled'],
-      translate: ['group-hover']
-    }
-  },
+  variants: {},
   plugins: [typography]
 }

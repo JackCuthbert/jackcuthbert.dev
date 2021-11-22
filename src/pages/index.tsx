@@ -1,5 +1,6 @@
 import React from 'react'
 import Head from 'next/head'
+import Image from 'next/image'
 import { Anchor } from '../components/Anchor'
 import { FeaturedProject } from '../components/FeaturedProject'
 import { WithLayout } from '../types'
@@ -18,12 +19,25 @@ const Home: WithLayout = () => {
         <meta property="og:description" content={pageDescription} />
       </Head>
 
-      <h1 className="font-black text-4xl mb-12">👋 Yo, I'm Jack.</h1>
-      <p className="mb-12 text-gray-800 text-xl pb-8 border-b-2 leading-relaxed">
-        I'm a <strong>full stack software engineer</strong> based in Melbourne,
-        Australia with a passion for{' '}
-        <strong>product development and design</strong>.
-      </p>
+      <div className="sm:flex sm:space-x-6 items-end text-center sm:text-left mb-16">
+        <div className="min-w-[192px] mb-8 sm:m-0">
+          <Image
+            src="/images/avatar.jpg"
+            alt="A photo of Jack"
+            width={192}
+            height={192}
+            className="rounded-2xl"
+          />
+        </div>
+        <div>
+          <h1 className="font-black text-4xl mb-6">Yo, I'm Jack.</h1>
+          <p className="text-gray-800 text-xl leading-relaxed">
+            I'm a <strong>full stack software engineer</strong> based in
+            Melbourne, Australia with a passion for{' '}
+            <strong>product development and design</strong>.
+          </p>
+        </div>
+      </div>
 
       <div className="space-y-4 mb-12 leading-relaxed">
         <p>
@@ -53,8 +67,8 @@ const Home: WithLayout = () => {
       </div>
 
       <h2 className="font-bold text-xl mb-8">My projects</h2>
-      <div className="grid grid-cols-1 gap-12 items-start sm:grid-cols-2 sm:gap-6 -mx-4 mt-4 mb-12">
-        <div className="grid grid-cols-1 gap-6 items-start">
+      <div className="grid items-start grid-cols-1 sm:grid-cols-2 sm:gap-8 mb-12 -mx-4">
+        <div className="grid grid-cols-1 items-start gap-4 mb-4 sm:mb-0 sm:gap-8">
           <FeaturedProject
             href="https://github.com/JackCuthbert/jackcuthbert.dev"
             imageSrc="/jackcuthbert-dev-favicon.png"
@@ -71,7 +85,7 @@ const Home: WithLayout = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 items-start">
+        <div className="grid grid-cols-1 items-start gap-4 sm:gap-8">
           <FeaturedProject
             href="https://kaomoji.moe"
             imageSrc="/kaomoji-favicon.png"

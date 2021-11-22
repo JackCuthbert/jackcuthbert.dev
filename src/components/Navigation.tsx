@@ -3,60 +3,54 @@ import React, { FC } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { constrainWidthClass } from '../layouts/StandardLayout'
+import { MagicHover } from './MagicHover'
+import type { AnchorProps } from '../types'
 
-const activeClass = 'font-bold'
-const sharedClass = 'inline-block px-3 py-2 rounded-md transition-all transform'
-const hoverClass = 'hover:bg-white hover:shadow-md group-hover:-translate-y-0.5'
-
-const NavItem: FC<{ href: string; className?: string }> = ({
-  href,
-  children,
-  ...props
-}) => {
+const NavItem: FC<AnchorProps> = ({ href, children, ...props }) => {
   const router = useRouter()
   const isActive = router.asPath === href
 
   return (
-    <div className="inline-block group">
-      <span className={isActive ? `font-bold` : 'font-normal'}>
-        <Link href={href} {...props}>
-          <a
-            className={
-              isActive
-                ? `cursor-default ${sharedClass} ${activeClass}`
-                : `${hoverClass} ${sharedClass}`
-            }
-          >
-            {children}
-          </a>
-        </Link>
-      </span>
-    </div>
+    <MagicHover
+      href={href}
+      className={`py-2 px-3 rounded-md ${
+        isActive ? 'font-bold !translate-y-0 !bg-transparent !shadow-none' : ''
+      }`}
+      {...props}
+    >
+      {children}
+    </MagicHover>
   )
 }
+
+const Background: FC = ({ children }) => (
+  <nav className="flex items-center space-x-4 mb-8 sm:mb-12 py-2 bg-gray-50 bg-opacity-90 backdrop-filter backdrop-blur-sm">
+    {children}
+  </nav>
+)
 
 export function Navigation(): JSX.Element {
   return (
     <div className={`${constrainWidthClass} sticky top-0 z-50`}>
-      <nav className="flex items-center space-x-4 mb-14 py-2 bg-gray-50 bg-opacity-90 backdrop-filter backdrop-blur-sm">
+      <Background>
         <Link href="/">
-          <a>
+          <a className="inline-flex items-center">
             <Image
-              src="/images/avatar.jpg"
-              alt="A photo of Jack Cuthbert"
+              src="/header-logo.png"
+              alt="Jack Cuthbert's multi-colour logo"
               width={32}
               height={32}
               className="rounded-full"
             />
           </a>
         </Link>
-        <div>
+        <div className="flex space-x-2">
           <NavItem href="/">Home</NavItem>
           <NavItem href="/blog">Blog</NavItem>
           <NavItem href="/notes">Notes</NavItem>
           <NavItem href="/uses">Uses</NavItem>
         </div>
-      </nav>
+      </Background>
     </div>
   )
 }

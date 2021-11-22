@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import React from 'react'
-import { Anchor } from './Anchor'
+import { MagicHover } from './MagicHover'
 
 interface Props {
   href: string
@@ -18,16 +18,12 @@ export function FeaturedProject({
   description
 }: Props): JSX.Element {
   return (
-    // TODO: Fix hover on edges
-    <Anchor
-      href={href}
-      className="group transform hover:bg-white p-4 hover:-translate-y-1 transition-all rounded-lg hover:shadow-md"
-    >
+    <MagicHover depth="deep" href={href} className="p-4 rounded-lg">
       <Image src={imageSrc} alt={`${name} icon`} width={42} height={42} />
       <h3 className="font-bold">
         {name} <span className="text-gray-400 font-normal">{year}</span>
       </h3>
       <p>{description}</p>
-    </Anchor>
+    </MagicHover>
   )
 }
