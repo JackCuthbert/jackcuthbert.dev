@@ -35,7 +35,7 @@ const BlogPost: WithLayout<Post> = ({ title, date, slug, body: { code } }) => {
           <OldPostPanel slug={slug} />
         </div>
       )}
-      <div className="prose prose-blue">
+      <div className="prose prose-blue mx-auto">
         <Component components={MDXComponents} />
       </div>
     </>
