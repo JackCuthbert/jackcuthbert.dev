@@ -49,6 +49,7 @@ export function Navigation(): JSX.Element {
           <NavItem href="/blog">Blog</NavItem>
           <NavItem href="/notes">Notes</NavItem>
           <NavItem href="/uses">Uses</NavItem>
+          <NavItem href="/data">Data</NavItem>
         </div>
       </Background>
     </div>

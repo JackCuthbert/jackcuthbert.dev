@@ -61,7 +61,7 @@ export interface TopTrack {
 export async function getTopTracks(limit = 50): Promise<TopTrack[]> {
   if (limit > 50) throw Error('getTopTracks may only return up to 50 tracks')
 
-  const endpoint = buildUrl('user.gettoptracks', { limit })
+  const endpoint = buildUrl('user.gettoptracks', { limit, period: '1month' })
   return await fetch(API_URL + endpoint)
     .then(toJson)
     .then(res => res.toptracks.track)

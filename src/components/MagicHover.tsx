@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
 import { AnchorProps } from '../types'
+import { Anchor } from './Anchor'
 
 interface Props extends AnchorProps {
   depth?: 'shallow' | 'deep'
@@ -17,12 +18,12 @@ export const MagicHover: FC<Props> = ({
       : 'group-hover:-translate-y-1'
 
   return (
-    <a className="group cursor-pointer" {...props}>
+    <Anchor className="group cursor-pointer" {...props}>
       <div
         className={`transform transition-all group-hover:bg-white group-hover:shadow-md ${depthClassname} ${className}`}
       >
         {children}
       </div>
-    </a>
+    </Anchor>
   )
 }
