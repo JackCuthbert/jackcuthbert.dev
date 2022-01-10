@@ -1,0 +1,146 @@
+---
+title: Unifi UDM with Pi-hole Conditional Forwarding
+date: '2021-12-10'
+tags: ['linux', 'networking', 'unifi', 'pi-hole']
+---
+
+# Unifi UDM with Pi-hole Conditional Forwarding
+
+<Image
+  title="Pi-hole dashboard"
+  alt="Pi-hole dashboard"
+  height={698}
+  src="/images/blog/unifi-udm-with-pi-hole-conditional-forwarding/pi-hole-dashboard.png"
+  width={1247}
+/>
+
+I've recently had to redo my home networking after moving, and I finally decided
+to pick up the Unifi UDM instead of a bunch of disparate Unifi devices that
+seemed to break down when I try to update or manage any of them.
+
+This guide details how to both configure Pi-hole with the UDM and enable
+Conditional Forwarding for nice hostnames in the Pi-hole UI. It should also work
+with an up-to-date USG, Cloud Key, or other Unifi Controller on your network.
+
+> The following assumes you've already set up the Pi-hole server on a static IP
+in your network.
+
+## 1. UDM: Set upstream DNS
+
+On the UDM, you'll need to set the DNS servers just like you would without a
+Pi-hole.
+
+In the new UI it's *Settings*, *Internet*, *WAN* (or whatever you've named your
+internet connection), *Advanced*, *DNS Server*. Set these values to whatever you
+like, [Cloudflare](https://www.cloudflare.com/dns/) or [Quad9](https://www.quad9.net/)
+are good options.
+
+## 2. UDM: Advertise Pi-hole DNS
+
+Next, we'll tell the DHCP server(s) that the UDM runs to advertise the Pi-hole's
+static IP address as the DNS server.
+
+In the new UI for **IPv4** it's:
+
+1. Settings
+2. Networks
+3. LAN (or the name you've chosen for your network(s))
+4. Advanced
+5. DHCP Name Server: **Change to Manual**
+6. DNS Server 1: **Change to the static Pi-hole IP address**
+
+In the new UI for **IPv6** it's very similar to IPv4, follow steps 1—4 and
+scroll _all_ the way to the bottom.
+
+1. Settings, Networks, LAN, Advanced (as above)
+2. Scroll until the end of time
+3. Ensure IPv6 is enabled via Interface Type (my ISP uses Prefix Delegation) and RA
+4. DHCPv6/RDNSS DNS Control: **Change to Manual**
+5. DNS Server 1: **Change to the Pi-hole IPv6 address**
+
+## 3. Pi-hole: Set upstream DNS
+
+Next, we'll change **all** the upstream DNS servers in Pi-hole to __only__ the
+router's address, typically `192.168.1.1`. Your settings panel should look
+something like this.
+
+<Image
+  title="Pi-hole DNS settings page"
+  alt="Pi-hole DNS settings page"
+  height={827}
+  src="/images/blog/unifi-udm-with-pi-hole-conditional-forwarding/pi-hole-dns-settings.png"
+  width={993}
+/>
+
+I automate this with the following Docker Compose file:
+
+```yaml:compose.yml showLineNumbers {15,19}
+version: '3.8'
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    restart: always
+    ports:
+      - '53:53/tcp'
+      - '53:53/udp'
+      - '8053:80/tcp' # access Pi-hole UI on this port
+    environment:
+      TZ: 'Australia/Melbourne'
+      WEBPASSWORD: 'SOME_PASSWORD'
+      PIHOLE_DNS_: '192.168.1.1'               # set to router upstream
+      FTLCONF_REPLY_ADDR4: '192.168.1.xx'      # ipv4 of Pi-hole server
+      FTLCONF_REPLY_ADDR6: 'XXXX:x00:000X::00' # ipv6 of Pi-hole server
+    dns:
+      - '127.0.0.1'
+    volumes:
+      - ./pihole/etc/pihole/:/etc/pihole/
+      - ./pihole/etc/dnsmasq.d/:/etc/dnsmasq.d/
+    cap_add:
+      - NET_ADMIN
+```
+
+> Line 19 is an interesting one. I needed to set this to prevent Pi-hole from
+using a default list of DNS servers on startup.
+
+
+## 4. Enable conditional forwarding
+
+Lastly, if you want the full hostnames reported in the Pi-hole UI instead of
+the IP addresses you'll need to enable conditional forwarding.
+
+To do this you need to make sure that:
+
+1. both the `FTLCONF_REPLY_ADDR4` and `FTLCONF_REPLY_ADDR6` environment variables are set for your Pi-hole server
+2. you've found the local domain name from the UDM (Settings, Networks, LAN, Advanced, Domain Name)
+
+Then, head to the Pi-hole DNS settings and all the way at the bottom you can
+enable Conditional Forwarding with your local network details. Mine looks like
+this:
+
+<Image
+  title="Pi-hole DNS settings page"
+  alt="Pi-hole DNS settings page"
+  height={139}
+  src="/images/blog/unifi-udm-with-pi-hole-conditional-forwarding/enable-conditional-forwarding.png"
+  width={696}
+/>
+
+## Check it works
+
+If everything went well you should be able to restart/reconnect your network
+adapters/services and the UDM DHCP server should advertise that the Pi-hole IP
+is the DNS server IP, the Pi-hole will start to get hostnames from your router,
+and your blocked domains will continue to be blocked!
+
+<Image
+  title="Pi-hole Top Clients"
+  alt="Pi-hole Top Clients"
+  height={366}
+  src="/images/blog/unifi-udm-with-pi-hole-conditional-forwarding/hostnames-in-pi-hole.png"
+  width={1009}
+/>
+
+If you're using `systemd-resolved` like me, you can use `resolvectl` to check
+which DNS servers are in use.
