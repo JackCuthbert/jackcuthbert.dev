@@ -26,7 +26,6 @@ const Blog: WithLayout<Props> = ({ posts }) => {
         <meta property="og:type" content="website" />
       </Head>
       <h1 className="font-black text-4xl mb-6">Blog</h1>
-      <UnderConstructionPanel />
       {/*
       <p className="mb-8 text-gray-800 text-lg leading-relaxed">
         Sometimes I write things.
