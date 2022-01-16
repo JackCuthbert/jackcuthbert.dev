@@ -1,0 +1,26 @@
+---
+title: WebStorm with Prisma's Generated Client
+date: '2022-01-16'
+tags: ['backend', 'prisma', 'webstorm', 'typescript']
+---
+
+# WebStorm with Prisma's Generated Client
+
+<Image
+  title="Excluded .prisma directory"
+  alt="Screenshot of the WebStorm project view with .prisma excluded"
+  height={440}
+  src="/images/blog/webstorm-with-prisma-generated-client/excluded-prisma-directory.png"
+  width={814}
+/>
+
+Something I've been struggling with this week is my new favourite editor,
+WebStorm, not playing nice with a generated Prisma client. Searching for
+solutions doesn't yield much outside a few GitHub issues (that didn't help)
+
+If anyone else found this post after giving up on WebStorm and going back to VS
+Code simply **mark the generated `.prisma` directory as _not excluded_** in WebStorm,
+then restart the IDE. WebStorm should then pick up the appropriate type
+definitions from the generated client.
+
+Thanks Elena Pogorelova for [this wonderful JetBrains forum post](https://intellij-support.jetbrains.com/hc/en-us/community/posts/360009385399-Go-to-declaration-auto-import-doesn-t-work-in-certain-situations).
