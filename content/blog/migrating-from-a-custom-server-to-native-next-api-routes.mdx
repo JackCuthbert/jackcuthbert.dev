@@ -1,0 +1,137 @@
+---
+title: Migrating from a custom server to native Next.js API routes
+date: '2022-08-02'
+tags: ['typescript', 'frontend', 'nextjs']
+---
+
+# Migrating from a custom server to native Next.js API routes
+
+At [Bueno](https://www.buenosystems.com.au/) we deploy our applications to GCP
+via Pulumi and Kubernetes (need more buzzwords?). When we first started building
+our applications with Next.js we knew we needed to proxy any API requests to our
+existing Spring + Kotlin backend service and a way to check if the apps are
+healthy in our k8s clusters.
+
+Historically this could be done with either a [custom server](https://nextjs.org/docs/advanced-features/custom-server)
+and some middleware or [Next.js rewrites](https://nextjs.org/docs/api-reference/next.config.js/rewrites).
+Recently we've been able to completely remove the custom server while retaining
+an API proxy and support for a k8s readiness probe.
+
+## How we did it before
+
+At the time we started building our first Next.js app, [Next.js rewrites](https://nextjs.org/docs/api-reference/next.config.js/rewrites)
+didn't exist so we went down the complete custom server route with:
+
+1. [a custom express server](https://github.com/vercel/next.js/tree/main/examples/custom-server-express)
+   with [express-actuator](https://github.com/rcruzper/express-actuator) and
+   [express-http-proxy](https://github.com/villadora/express-http-proxy) middleware
+2. [nodemon](https://nodemon.io/) and a second `tsconfig.server.json` file to
+   manage the compilation of our custom server for development
+3. Additional build scripts and `Dockerfile` steps to package up the custom
+   server
+
+The combination of which ended up making our application far more complex to
+maintain than we'd like, slower to start, and slightly more difficult to package
+up for k8s.
+
+## How we do it now
+
+Without a custom server of course!
+
+### The proxy
+
+For the proxy we've made use of the package
+[next-http-proxy-middleware](https://github.com/stegano/next-http-proxy-middleware)
+which creates a Next.js handler function that can catch all the requests made to
+`/api` and forward them to our proxy target configured by a
+`process.env.API_HOST` variable.
+
+```ts:./src/pages/api/[...proxy].ts
+import httpProxyMiddleware from 'next-http-proxy-middleware'
+import { type NextApiHandler } from 'next'
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+}
+
+const handler: NextApiHandler = async (req, res) =>
+  await httpProxyMiddleware(req, res, {
+    target: process.env.API_HOST,
+    pathRewrite: [
+      {
+        patternStr: '^/api',
+        replaceStr: ''
+      }
+    ]
+  })
+
+export default handler
+```
+
+The `externalResolver: true` config property here is to prevent Next.js from
+warning us about possible stalled requests. Next has some internal checks to
+ensure that any `/api` route returns some data. We're effectively bypassing this
+completely by using a proxy server and Next.js is (correctly) freaking out about
+it.
+
+Without this config Next will warn you about potentially stalled requests.
+[See this related GitHub Issue](https://github.com/stegano/next-http-proxy-middleware/issues/32#issuecomment-1031015850)
+
+### A note on Next.js rewrites
+
+At the time of writing the `rewrites` property in Next.js does not support
+runtime configuration via `process.env` variables. This made it a non-starter
+for us as we need to be able to configure our proxy target URL well after the
+app is built and deployed to a cluster.
+
+### The actuator
+
+Because we use Pulumi and K8S to orchestrate our infrastructure we need a way to
+determine if our apps are up ([via readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)).
+Originally we used the [express-actuator](https://github.com/rcruzper/express-actuator)
+middleware in the custom server from earlier to provide some Spring-style
+actuator endpoints. In order to remove the custom server we need to write those
+same endpoints but this time with native Next.js API routes.
+
+We've open soured [@bueno-systems/next-actuator](https://www.npmjs.com/package/@bueno-systems/next-actuator)
+to do exactly that for you!
+
+Install it with:
+
+```shell
+npm install --save @bueno-systems/next-actuator
+# or
+yarn add @bueno-systems/next-actuator
+```
+
+Then in your Next.js application it's as simple as:
+
+```ts:./src/pages/api/actuator/[...actuator].ts
+import nextActuator from '@bueno-systems/next-actuator'
+
+export default nextActuator()
+```
+
+This will set up api routes for:
+
+- `GET /api/actuator/health`
+- `GET /api/actuator/info`
+- `GET /api/actuator/metrics`
+
+For more information on usage, responses, and possible configuration,
+[see the code on GitHub](https://github.com/bueno-systems/next-actuator).
+
+## Closing thoughts
+
+Not only did we remove more dependencies than we added when we originally built
+this functionality into our app we also saw gains in developer experience by:
+
+- Reduced complexity in packaging and deployment
+- Reducing dev mode boot times
+- Allowing our devs to create custom API endpoints or mock APIs in the Next.js
+  way without extra dependencies either in code or on our backend team
+
+We (as a company) have also released our first open source library that is truly
+useful that I'll personally be using in my own Next.js projects in the future.
