@@ -40,34 +40,75 @@ Without a custom server of course!
 
 ### The proxy
 
-For the proxy we've made use of the package
-[next-http-proxy-middleware](https://github.com/stegano/next-http-proxy-middleware)
-which creates a Next.js handler function that can catch all the requests made to
-`/api` and forward them to our proxy target configured by a
-`process.env.API_HOST` variable.
+For the proxy we've made use of the widely used package
+[node-http-proxy](https://github.com/http-party/node-http-proxy)
+and a custom Next.js API route at `/api` which forwards all requests to our
+proxy target configured by a `process.env.API_HOST` variable.
+
+> A previous version of this post suggested using the [next-http-proxy-middleware](https://github.com/stegano/next-http-proxy-middleware)
+> package which we had to replace due to a serious memory leak issue resulting
+> in server restarts. The following achieves the same functionality without the
+> memory leak.
+
+Install the proxy library:
+
+```shell
+npm install --save http-proxy
+```
+
+Then create a catch-all route at `/api`:
 
 ```ts:./src/pages/api/[...proxy].ts
-import httpProxyMiddleware from 'next-http-proxy-middleware'
+import httpProxy from 'http-proxy'
 import { type NextApiHandler } from 'next'
 
-export const config = {
-  api: {
-    externalResolver: true
+// We add support for path rewrites by extending the default options
+interface Config extends httpProxy.ServerOptions {
+  rewritePath: {
+    pattern: string
+    replace: string
   }
 }
 
-const handler: NextApiHandler = async (req, res) =>
-  await httpProxyMiddleware(req, res, {
-    target: process.env.API_HOST,
-    pathRewrite: [
-      {
-        patternStr: '^/api',
-        replaceStr: ''
-      }
-    ]
-  })
+// First we create a function that creates our handler and proxy instance
+function setupProxy({ rewritePath, ...config }: Config): NextApiHandler {
+  const proxy = httpProxy.createProxy(config)
 
-export default handler
+  return (req, res) => {
+    // here we replace the URL that's passed through to the proxy web handler
+    // with the rewrite that we've defined
+    const exp = new RegExp(rewritePath.pattern)
+    req.url = req.url?.replace(exp, rewritePath.replace)
+
+    proxy.web(
+      req,
+      res,
+      {
+        changeOrigin: true,
+        ...config
+      },
+      // NOTE: You _must_ handle any errors here as the http-proxy package does
+      // not handle them for you. This will not affect any downstream severs
+      // returning status codes >=400, only errors communicating with downstream
+      // servers are handled here.
+      // We've found a 500 code with a simple message here adequate.
+      error => {
+        console.error(error)
+        res.status(500)
+        res.send(error.message)
+      }
+    )
+  }
+}
+
+// Then we call to configure it and create the function which is exported as normal
+export default setupProxy({
+  target: 'http://my.api.url:1337',
+  rewritePath: {
+    pattern: '^/api',
+    replace: ''
+  }
+})
 ```
 
 The `externalResolver: true` config property here is to prevent Next.js from
