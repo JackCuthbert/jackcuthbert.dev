@@ -47,7 +47,6 @@ export function Navigation(): JSX.Element {
         <div className="flex space-x-2">
           <NavItem href="/">Home</NavItem>
           <NavItem href="/blog">Blog</NavItem>
-          <NavItem href="/notes">Notes</NavItem>
           <NavItem href="/uses">Uses</NavItem>
           <NavItem href="/data">Data</NavItem>
         </div>
