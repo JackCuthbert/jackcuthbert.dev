@@ -109,7 +109,9 @@ const Home: WithLayout = () => {
         <Anchor href="https://www.linkedin.com/in/jackcuthbert/">
           LinkedIn
         </Anchor>
-        <Anchor href="https://steamcommunity.com/id/xs1mple/">Steam</Anchor>
+        <Anchor href="https://steamcommunity.com/profiles/76561198003579945">
+          Steam
+        </Anchor>
         <Anchor href="https://last.fm/user/jckcthbrt">Last.fm</Anchor>
       </div>
     </>
