@@ -131,7 +131,7 @@ const Data: WithLayout = () => {
         <span className="font-normal text-sm">(TV Shows, last 6)</span>
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 -mx-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 -mx-4 mb-12 border-b pb-8">
         {/* TODO: Remove this */}
         {/* eslint-disable-next-line @typescript-eslint/naming-convention */}
         {shows?.map(({ show, last_watched_at }) => (
@@ -156,11 +156,6 @@ const Data: WithLayout = () => {
           </MagicHover>
         ))}
       </div>
-      <p className="mb-12 border-b pb-8">
-        <Anchor href="https://trakt.tv/users/jckcthbrt/progress">
-          View complete progress
-        </Anchor>
-      </p>
 
       <h2 className="font-bold text-xl mb-6">
         🎬 Movie & TV show stats{' '}
@@ -168,7 +163,7 @@ const Data: WithLayout = () => {
       </h2>
 
       {stats != null && (
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-12">
           <div>
             <p className="text-4xl font-black mb-1">{stats.movies.watched}</p>
             <p className="text-sm">Movies</p>
@@ -193,11 +188,6 @@ const Data: WithLayout = () => {
           </div>
         </div>
       )}
-      <p className="mb-12">
-        <Anchor href="https://trakt.tv/users/jckcthbrt">
-          Follow me on Trakt.tv
-        </Anchor>
-      </p>
     </>
   )
 }
