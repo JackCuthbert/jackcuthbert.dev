@@ -9,3 +9,7 @@ insert_final_newline = true
 [*.md]
 max_line_length = 0
 trim_trailing_whitespace = false
+
+[*.mdx]
+max_line_length = 120
+trim_trailing_whitespace = false
